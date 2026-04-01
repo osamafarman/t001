@@ -3,129 +3,573 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ثلاثية — الرئيسية</title>
-<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;700;900&display=swap" rel="stylesheet">
+<title>NEXUS — البوابة</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Tajawal:wght@200;300;400;700;900&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #0a0a0f;
-    --accent1: #c084fc;
-    --accent2: #38bdf8;
-    --accent3: #4ade80;
-    --text: #f0f0f8;
-    --muted: #888;
-  }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    background: var(--bg);
-    font-family: 'Tajawal', sans-serif;
-    color: var(--text);
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background:
-      radial-gradient(ellipse 60% 40% at 20% 20%, rgba(192,132,252,0.08) 0%, transparent 60%),
-      radial-gradient(ellipse 50% 50% at 80% 80%, rgba(56,189,248,0.06) 0%, transparent 60%),
-      radial-gradient(ellipse 40% 60% at 60% 30%, rgba(74,222,128,0.05) 0%, transparent 60%);
-    z-index: 0;
-    pointer-events: none;
-  }
-  .container { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 0 2rem; }
-  header { padding: 5rem 0 3rem; text-align: center; animation: fadeDown 0.8s ease both; }
-  .site-logo { font-size: 0.85rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); margin-bottom: 1.5rem; }
-  h1 {
-    font-size: clamp(3rem, 8vw, 6rem);
-    font-weight: 900;
-    line-height: 1;
-    background: linear-gradient(135deg, var(--accent1), var(--accent2), var(--accent3));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin-bottom: 1rem;
-  }
-  .subtitle { font-size: 1.1rem; color: var(--muted); font-weight: 300; letter-spacing: 0.05em; }
-  .divider { width: 60px; height: 2px; background: linear-gradient(90deg, var(--accent1), var(--accent3)); margin: 2rem auto; border-radius: 2px; }
-  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; padding: 2rem 0 6rem; }
-  .card {
-    position: relative;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 20px;
-    padding: 2.5rem 2rem;
-    text-decoration: none;
-    color: inherit;
-    overflow: hidden;
-    transition: transform 0.35s cubic-bezier(0.23, 1, 0.32, 1), border-color 0.3s, box-shadow 0.3s;
-    animation: fadeUp 0.8s ease both;
-  }
-  .card:nth-child(1) { animation-delay: 0.1s; }
-  .card:nth-child(2) { animation-delay: 0.2s; }
-  .card:nth-child(3) { animation-delay: 0.3s; }
-  .card::before { content: ''; position: absolute; inset: 0; opacity: 0; transition: opacity 0.3s; border-radius: 20px; }
-  .card-1::before { background: radial-gradient(circle at 50% 0%, rgba(192,132,252,0.15), transparent 70%); }
-  .card-2::before { background: radial-gradient(circle at 50% 0%, rgba(56,189,248,0.15), transparent 70%); }
-  .card-3::before { background: radial-gradient(circle at 50% 0%, rgba(74,222,128,0.15), transparent 70%); }
-  .card:hover { transform: translateY(-8px); }
-  .card:hover::before { opacity: 1; }
-  .card-1:hover { border-color: rgba(192,132,252,0.4); box-shadow: 0 20px 60px rgba(192,132,252,0.15); }
-  .card-2:hover { border-color: rgba(56,189,248,0.4); box-shadow: 0 20px 60px rgba(56,189,248,0.15); }
-  .card-3:hover { border-color: rgba(74,222,128,0.4); box-shadow: 0 20px 60px rgba(74,222,128,0.15); }
-  .card-icon { font-size: 3rem; margin-bottom: 1.5rem; display: block; }
-  .card-num { font-size: 0.75rem; letter-spacing: 0.25em; text-transform: uppercase; margin-bottom: 0.75rem; font-weight: 700; }
-  .card-1 .card-num { color: var(--accent1); }
-  .card-2 .card-num { color: var(--accent2); }
-  .card-3 .card-num { color: var(--accent3); }
-  .card h2 { font-size: 1.8rem; font-weight: 900; margin-bottom: 0.75rem; }
-  .card p { font-size: 0.95rem; color: var(--muted); line-height: 1.7; font-weight: 300; }
-  .card-arrow { display: inline-flex; align-items: center; gap: 0.5rem; margin-top: 1.5rem; font-size: 0.9rem; font-weight: 700; transition: gap 0.2s; }
-  .card-1 .card-arrow { color: var(--accent1); }
-  .card-2 .card-arrow { color: var(--accent2); }
-  .card-3 .card-arrow { color: var(--accent3); }
-  .card:hover .card-arrow { gap: 1rem; }
-  .card-bg-num { position: absolute; bottom: -1rem; left: 1rem; font-size: 8rem; font-weight: 900; opacity: 0.03; line-height: 1; pointer-events: none; }
-  footer { text-align: center; padding: 2rem 0; color: var(--muted); font-size: 0.85rem; border-top: 1px solid rgba(255,255,255,0.05); position: relative; z-index: 1; }
-  @keyframes fadeDown { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
-  @keyframes fadeUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
+:root {
+  --bg:#02040a; --c1:#00f5ff; --c2:#ff2d7a; --c3:#7c3aed;
+  --c4:#00ff88; --text:#e8f4f8; --muted:#3a4a5c;
+  --glass:rgba(255,255,255,0.03); --border:rgba(0,245,255,0.12);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--bg);color:var(--text);
+  font-family:'Tajawal',sans-serif;
+  overflow-x:hidden;cursor:none;
+}
+
+/* ── CUSTOM CURSOR ── */
+#cursor{
+  position:fixed;width:12px;height:12px;background:var(--c1);
+  border-radius:50%;pointer-events:none;z-index:9999;
+  transform:translate(-50%,-50%);
+  box-shadow:0 0 20px var(--c1),0 0 40px rgba(0,245,255,.4);
+  transition:width .2s,height .2s,background .2s;
+}
+#cursor-ring{
+  position:fixed;width:40px;height:40px;
+  border:1px solid rgba(0,245,255,.5);
+  border-radius:50%;pointer-events:none;z-index:9998;
+  transform:translate(-50%,-50%);
+  transition:all .12s ease-out;
+}
+body:has(a:hover) #cursor,
+body:has(button:hover) #cursor { width:20px;height:20px;background:var(--c2); }
+body:has(a:hover) #cursor-ring,
+body:has(button:hover) #cursor-ring { width:60px;height:60px;border-color:var(--c2); }
+
+/* ── THREE.JS CANVAS ── */
+#three-canvas{position:fixed;inset:0;z-index:0;}
+
+/* ── NOISE OVERLAY ── */
+#noise{
+  position:fixed;inset:0;z-index:1;pointer-events:none;
+  opacity:.035;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+}
+
+/* ── NAV ── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:20px 56px;
+  background:rgba(2,4,10,0.7);
+  backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--border);
+}
+.logo{
+  font-family:'Orbitron',monospace;font-weight:900;font-size:20px;
+  color:var(--c1);letter-spacing:5px;text-decoration:none;
+  position:relative;
+}
+.logo::after{
+  content:'';position:absolute;bottom:-4px;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,var(--c1),transparent);
+}
+.logo .dot{color:var(--c2);}
+nav ul{display:flex;gap:36px;list-style:none;}
+nav a:not(.logo){
+  color:var(--muted);text-decoration:none;font-size:13px;
+  font-weight:500;letter-spacing:3px;text-transform:uppercase;
+  transition:all .4s;position:relative;
+}
+nav a:not(.logo)::after{
+  content:'';position:absolute;bottom:-6px;left:0;width:0;height:1px;
+  background:var(--c1);transition:width .4s;
+}
+nav a:not(.logo):hover{color:var(--c1);}
+nav a:not(.logo):hover::after{width:100%;}
+
+/* ── HERO ── */
+.hero{
+  position:relative;z-index:10;
+  min-height:100vh;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  text-align:center;
+  padding:0 24px;
+}
+
+.hero-eyebrow{
+  display:inline-flex;align-items:center;gap:10px;
+  background:rgba(0,245,255,0.06);
+  border:1px solid rgba(0,245,255,0.2);
+  border-radius:100px;padding:8px 22px;
+  font-size:11px;letter-spacing:4px;color:var(--c1);
+  text-transform:uppercase;margin-bottom:48px;
+  opacity:0;
+}
+.hero-eyebrow-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--c1);animation:pulse 2s infinite;
+  box-shadow:0 0 8px var(--c1);
+}
+@keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.4);}}
+
+.hero-title{
+  font-family:'Orbitron',monospace;
+  font-size:clamp(56px,10vw,130px);
+  font-weight:900;line-height:.95;
+  letter-spacing:-2px;
+  opacity:0;
+}
+.hero-title .t1{
+  display:block;color:var(--text);
+  -webkit-text-stroke:1px rgba(255,255,255,.1);
+}
+.hero-title .t2{
+  display:block;
+  background:linear-gradient(135deg,var(--c1) 0%,#0080ff 40%,var(--c2) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 0 40px rgba(0,245,255,.5));
+}
+
+.hero-sub{
+  margin-top:32px;
+  font-size:clamp(16px,2vw,20px);
+  color:var(--muted);font-weight:300;
+  min-height:32px;
+  opacity:0;
+}
+.hero-sub .typed-cursor{color:var(--c1);font-weight:100;}
+
+.scroll-hint{
+  position:absolute;bottom:40px;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+  color:var(--muted);font-size:11px;letter-spacing:3px;opacity:0;
+}
+.scroll-line{
+  width:1px;height:50px;
+  background:linear-gradient(to bottom,var(--c1),transparent);
+  animation:scrollDrop 2s ease infinite;
+}
+@keyframes scrollDrop{
+  0%{transform:scaleY(0);transform-origin:top;}
+  50%{transform:scaleY(1);transform-origin:top;}
+  51%{transform:scaleY(1);transform-origin:bottom;}
+  100%{transform:scaleY(0);transform-origin:bottom;}
+}
+
+/* ── SECTION: CARDS ── */
+.section{position:relative;z-index:10;padding:80px 40px 120px;}
+
+.section-label{
+  text-align:center;
+  font-family:'Orbitron',monospace;font-size:11px;
+  letter-spacing:6px;color:var(--c1);
+  margin-bottom:16px;opacity:.7;
+}
+.section-title{
+  text-align:center;font-size:clamp(28px,4vw,48px);
+  font-weight:900;margin-bottom:64px;
+  line-height:1.2;
+}
+.section-title span{
+  background:linear-gradient(90deg,var(--c2),var(--c3));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+
+.cards-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+  gap:24px;max-width:1100px;margin:0 auto;
+}
+
+.card{
+  background:var(--glass);
+  border:1px solid rgba(255,255,255,0.06);
+  border-radius:24px;padding:40px 32px;
+  text-decoration:none;color:var(--text);
+  position:relative;overflow:hidden;
+  transform:translateY(60px);opacity:0;
+  transition:border-color .4s,box-shadow .4s;
+}
+.card::before{/* shimmer border top */
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  transform:scaleX(0);transform-origin:left;
+  transition:transform .6s cubic-bezier(.23,1,.32,1);
+}
+.card-cyan::before{background:linear-gradient(90deg,var(--c1),transparent);}
+.card-pink::before{background:linear-gradient(90deg,var(--c2),transparent);}
+.card-violet::before{background:linear-gradient(90deg,var(--c3),transparent);}
+.card:hover::before{transform:scaleX(1);}
+.card:hover{border-color:rgba(255,255,255,.15);}
+.card-cyan:hover{box-shadow:0 20px 60px rgba(0,245,255,.1),inset 0 0 60px rgba(0,245,255,.03);}
+.card-pink:hover{box-shadow:0 20px 60px rgba(255,45,122,.1),inset 0 0 60px rgba(255,45,122,.03);}
+.card-violet:hover{box-shadow:0 20px 60px rgba(124,58,237,.1),inset 0 0 60px rgba(124,58,237,.03);}
+
+/* Card glow bg on hover */
+.card::after{
+  content:'';position:absolute;width:200px;height:200px;
+  border-radius:50%;filter:blur(60px);opacity:0;
+  transition:opacity .5s,transform .5s;
+  pointer-events:none;
+  bottom:-60px;right:-40px;
+}
+.card-cyan::after{background:var(--c1);}
+.card-pink::after{background:var(--c2);}
+.card-violet::after{background:var(--c3);}
+.card:hover::after{opacity:.07;}
+
+.card-number{
+  font-family:'Orbitron',monospace;font-size:64px;font-weight:900;
+  line-height:1;margin-bottom:24px;
+  -webkit-text-stroke:1px;
+}
+.card-cyan .card-number{color:transparent;-webkit-text-stroke-color:rgba(0,245,255,.2);}
+.card-pink .card-number{color:transparent;-webkit-text-stroke-color:rgba(255,45,122,.2);}
+.card-violet .card-number{color:transparent;-webkit-text-stroke-color:rgba(124,58,237,.2);}
+
+.card-icon-wrap{
+  width:56px;height:56px;border-radius:14px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:26px;margin-bottom:20px;
+}
+.card-cyan .card-icon-wrap{background:rgba(0,245,255,.1);}
+.card-pink .card-icon-wrap{background:rgba(255,45,122,.1);}
+.card-violet .card-icon-wrap{background:rgba(124,58,237,.1);}
+
+.card h2{font-size:22px;font-weight:700;margin-bottom:12px;}
+.card p{font-size:14px;color:var(--muted);line-height:1.9;}
+
+.card-cta{
+  display:inline-flex;align-items:center;gap:8px;
+  margin-top:28px;font-size:13px;font-weight:600;
+  letter-spacing:2px;text-transform:uppercase;
+  transition:gap .3s;
+}
+.card-cyan .card-cta{color:var(--c1);}
+.card-pink .card-cta{color:var(--c2);}
+.card-violet .card-cta{color:#a78bfa;}
+.card:hover .card-cta{gap:14px;}
+
+/* ── STATS TICKER ── */
+.ticker{
+  position:relative;z-index:10;
+  border-top:1px solid var(--border);
+  border-bottom:1px solid var(--border);
+  padding:18px 0;overflow:hidden;
+  background:rgba(0,245,255,.02);
+}
+.ticker-track{
+  display:flex;gap:64px;width:max-content;
+  animation:tickerScroll 18s linear infinite;
+}
+@keyframes tickerScroll{to{transform:translateX(-50%);}}
+.ticker-item{
+  display:flex;align-items:center;gap:12px;
+  font-family:'Orbitron',monospace;font-size:12px;letter-spacing:3px;
+  color:var(--muted);white-space:nowrap;
+}
+.ticker-item strong{color:var(--c1);}
+.ticker-sep{color:var(--c2);font-size:8px;}
+
+/* ── FOOTER ── */
+footer{
+  position:relative;z-index:10;
+  text-align:center;padding:40px 24px;
+  color:var(--muted);font-size:13px;
+  border-top:1px solid rgba(255,255,255,.04);
+}
+footer .f-logo{
+  font-family:'Orbitron',monospace;font-size:28px;font-weight:900;
+  background:linear-gradient(90deg,var(--c1),var(--c2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  margin-bottom:12px;display:block;
+}
 </style>
 </head>
 <body>
-<div class="container">
-  <header>
-    <div class="site-logo">✦ مجموعة أدوات تفاعلية ✦</div>
-    <h1>ثلاثية</h1>
-    <p class="subtitle">ثلاثة تطبيقات، لا حدود للإبداع</p>
-    <div class="divider"></div>
-  </header>
-  <div class="cards">
-    <a href="calculator.html" class="card card-1">
-      <span class="card-icon">🧮</span>
-      <div class="card-num">01 — أداة</div>
-      <h2>الآلة الحاسبة</h2>
-      <p>آلة حاسبة علمية متكاملة بتصميم عصري ودعم العمليات المتقدمة</p>
-      <div class="card-arrow">ابدأ الحساب ←</div>
-      <div class="card-bg-num">01</div>
-    </a>
-    <a href="game.html" class="card card-2">
-      <span class="card-icon">🎮</span>
-      <div class="card-num">02 — لعبة</div>
-      <h2>لعبة الذاكرة</h2>
-      <p>تحدَّ نفسك بلعبة الذاكرة واكتشف الأزواج المتطابقة</p>
-      <div class="card-arrow">العب الآن ←</div>
-      <div class="card-bg-num">02</div>
-    </a>
-    <a href="flags.html" class="card card-3">
-      <span class="card-icon">🌍</span>
-      <div class="card-num">03 — معلومات</div>
-      <h2>أعلام الدول</h2>
-      <p>استكشف أعلام دول العالم مع معلومات عن كل دولة وعاصمتها ولغتها</p>
-      <div class="card-arrow">استكشف العالم ←</div>
-      <div class="card-bg-num">03</div>
-    </a>
+
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+<div id="noise"></div>
+<canvas id="three-canvas"></canvas>
+
+<nav>
+  <a href="index.html" class="logo">NEX<span class="dot">.</span>US</a>
+  <ul>
+    <li><a href="calculator.html">الحاسبة</a></li>
+    <li><a href="game.html">اللعبة</a></li>
+    <li><a href="flags.html">الأعلام</a></li>
+  </ul>
+</nav>
+
+<section class="hero">
+  <div class="hero-eyebrow">
+    <div class="hero-eyebrow-dot"></div>
+    مرحباً بك في العالم الرقمي
+  </div>
+
+  <h1 class="hero-title">
+    <span class="t1">بوابة</span>
+    <span class="t2">NEXUS</span>
+  </h1>
+
+  <p class="hero-sub">
+    <span id="typed-text"></span>
+  </p>
+
+  <div class="scroll-hint">
+    <span>SCROLL</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<div class="ticker">
+  <div class="ticker-track" id="ticker">
+    <div class="ticker-item"><span class="ticker-sep">◆</span> آلة حاسبة <strong>علمية</strong></div>
+    <div class="ticker-item"><span class="ticker-sep">◆</span> لعبة <strong>الذاكرة</strong></div>
+    <div class="ticker-item"><span class="ticker-sep">◆</span> أعلام <strong>دول العالم</strong></div>
+    <div class="ticker-item"><span class="ticker-sep">◆</span> تصميم <strong>مستقبلي</strong></div>
+    <div class="ticker-item"><span class="ticker-sep">◆</span> Three<strong>.js</strong></div>
+    <div class="ticker-item"><span class="ticker-sep">◆</span> GSAP <strong>Animations</strong></div>
+    <div class="ticker-item"><span class="ticker-sep">◆</span> Chart<strong>.js</strong></div>
+    <div class="ticker-item"><span class="ticker-sep">◆</span> Anime<strong>.js</strong></div>
+    <!-- duplicate for seamless loop -->
+    <div class="ticker-item"><span class="ticker-sep">◆</span> آلة حاسبة <strong>علمية</strong></div>
+    <div class="ticker-item"><span class="ticker-sep">◆</span> لعبة <strong>الذاكرة</strong></div>
+    <div class="ticker-item"><span class="ticker-sep">◆</span> أعلام <strong>دول العالم</strong></div>
+    <div class="ticker-item"><span class="ticker-sep">◆</span> تصميم <strong>مستقبلي</strong></div>
+    <div class="ticker-item"><span class="ticker-sep">◆</span> Three<strong>.js</strong></div>
+    <div class="ticker-item"><span class="ticker-sep">◆</span> GSAP <strong>Animations</strong></div>
+    <div class="ticker-item"><span class="ticker-sep">◆</span> Chart<strong>.js</strong></div>
+    <div class="ticker-item"><span class="ticker-sep">◆</span> Anime<strong>.js</strong></div>
   </div>
 </div>
-<footer><div class="container">صُنع بـ ❤️ — جميع الحقوق محفوظة © 2025</div></footer>
+
+<section class="section">
+  <p class="section-label">✦ استكشف ✦</p>
+  <h2 class="section-title">اختر <span>تجربتك</span></h2>
+
+  <div class="cards-grid">
+    <a href="calculator.html" class="card card-cyan">
+      <div class="card-number">01</div>
+      <div class="card-icon-wrap">🧮</div>
+      <h2>الآلة الحاسبة</h2>
+      <p>آلة حاسبة علمية متطورة مع رسم بياني لسجل العمليات، تأثيرات GSAP، ودعم لوحة المفاتيح الكاملة</p>
+      <div class="card-cta">افتح الآن <span>→</span></div>
+    </a>
+
+    <a href="game.html" class="card card-pink">
+      <div class="card-number">02</div>
+      <div class="card-icon-wrap">🎮</div>
+      <h2>لعبة الذاكرة</h2>
+      <p>لعبة مطابقة البطاقات مع انيمشن GSAP ثلاثي الأبعاد، انفجار جزيئات Anime.js عند كل مطابقة</p>
+      <div class="card-cta">العب الآن <span>→</span></div>
+    </a>
+
+    <a href="flags.html" class="card card-violet">
+      <div class="card-number">03</div>
+      <div class="card-icon-wrap">🌍</div>
+      <h2>أعلام الدول</h2>
+      <p>مستكشف الأعلام مع رسم بياني Chart.js للتوزيع الإقليمي، فلترة متحركة، وبطاقات معلومات ثرية</p>
+      <div class="card-cta">استكشف الآن <span>→</span></div>
+    </a>
+  </div>
+</section>
+
+<footer>
+  <span class="f-logo">NEXUS</span>
+  <p>ثلاث تجارب رقمية في عالم واحد &nbsp;·&nbsp; مبني بـ Three.js · GSAP · Chart.js · Anime.js</p>
+</footer>
+
+<!-- LIBRARIES -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/typed.js/2.0.12/typed.min.js"></script>
+
+<script>
+// ─────────────────────────────────────────────
+// CUSTOM CURSOR
+// ─────────────────────────────────────────────
+const cursor = document.getElementById('cursor');
+const ring   = document.getElementById('cursor-ring');
+let mx=0,my=0,rx=0,ry=0;
+
+document.addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY;
+  gsap.to(cursor, { x:mx, y:my, duration:.05 });
+});
+(function animRing(){
+  rx += (mx - rx) * .1;
+  ry += (my - ry) * .1;
+  gsap.set(ring, { x:rx, y:ry });
+  requestAnimationFrame(animRing);
+})();
+
+// ─────────────────────────────────────────────
+// THREE.JS — NEURAL NETWORK PARTICLE FIELD
+// ─────────────────────────────────────────────
+(function initThree(){
+  const canvas   = document.getElementById('three-canvas');
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:true });
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.setSize(innerWidth, innerHeight);
+  renderer.setClearColor(0x02040a, 1);
+
+  const scene  = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(65, innerWidth/innerHeight, .1, 1000);
+  camera.position.z = 180;
+
+  // Fog
+  scene.fog = new THREE.FogExp2(0x02040a, 0.0035);
+
+  // Particles
+  const COUNT  = 180;
+  const spread = 160;
+  const positions = [];
+  const velocities = [];
+  for(let i=0;i<COUNT;i++){
+    positions.push(
+      (Math.random()-.5)*spread,
+      (Math.random()-.5)*spread,
+      (Math.random()-.5)*spread
+    );
+    velocities.push(
+      (Math.random()-.5)*.08,
+      (Math.random()-.5)*.08,
+      (Math.random()-.5)*.08
+    );
+  }
+  const posArr = new Float32Array(positions);
+  const ptGeo  = new THREE.BufferGeometry();
+  ptGeo.setAttribute('position', new THREE.BufferAttribute(posArr, 3));
+
+  const ptMat = new THREE.PointsMaterial({
+    color: 0x00f5ff, size: 1.2, transparent:true, opacity:.85,
+    sizeAttenuation:true
+  });
+  const points = new THREE.Points(ptGeo, ptMat);
+  scene.add(points);
+
+  // Lines between nearby points
+  const lineMat = new THREE.LineBasicMaterial({
+    color:0x00f5ff, transparent:true, opacity:.08
+  });
+  let lineGeo, linesMesh;
+  function buildLines(){
+    const pts = ptGeo.attributes.position.array;
+    const linePos = [];
+    const DIST = 38;
+    for(let i=0;i<COUNT;i++){
+      for(let j=i+1;j<COUNT;j++){
+        const dx=pts[i*3]-pts[j*3], dy=pts[i*3+1]-pts[j*3+1], dz=pts[i*3+2]-pts[j*3+2];
+        if(Math.sqrt(dx*dx+dy*dy+dz*dz)<DIST){
+          linePos.push(pts[i*3],pts[i*3+1],pts[i*3+2]);
+          linePos.push(pts[j*3],pts[j*3+1],pts[j*3+2]);
+        }
+      }
+    }
+    if(linesMesh) scene.remove(linesMesh);
+    lineGeo = new THREE.BufferGeometry();
+    lineGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(linePos),3));
+    linesMesh = new THREE.LineSegments(lineGeo, lineMat);
+    scene.add(linesMesh);
+  }
+  buildLines();
+
+  // Mouse influence
+  let targetRotX=0, targetRotY=0;
+  document.addEventListener('mousemove', e=>{
+    targetRotY = (e.clientX/innerWidth - .5) * .4;
+    targetRotX = (e.clientY/innerHeight - .5) * .2;
+  });
+
+  // Clock for auto-rotation
+  const clock = new THREE.Clock();
+  function animate(){
+    requestAnimationFrame(animate);
+    const t = clock.getElapsedTime();
+
+    // Move particles
+    const pos = ptGeo.attributes.position.array;
+    for(let i=0;i<COUNT;i++){
+      pos[i*3]   += velocities[i*3];
+      pos[i*3+1] += velocities[i*3+1];
+      pos[i*3+2] += velocities[i*3+2];
+      // bounce off bounding sphere
+      const d=Math.sqrt(pos[i*3]**2+pos[i*3+1]**2+pos[i*3+2]**2);
+      if(d>spread*.6){
+        velocities[i*3]*=-.98;velocities[i*3+1]*=-.98;velocities[i*3+2]*=-.98;
+      }
+    }
+    ptGeo.attributes.position.needsUpdate=true;
+
+    // Rebuild lines every 2 frames
+    if(Math.round(t*60)%2===0) buildLines();
+
+    // Smooth group rotation
+    points.rotation.y   += (targetRotY - points.rotation.y)*.05;
+    points.rotation.x   += (targetRotX - points.rotation.x)*.05;
+    if(linesMesh){
+      linesMesh.rotation.y = points.rotation.y;
+      linesMesh.rotation.x = points.rotation.x;
+    }
+
+    // Slow auto-spin
+    points.rotation.y   += .0004;
+    if(linesMesh) linesMesh.rotation.y += .0004;
+
+    // Pulsing
+    const s = 1 + Math.sin(t*.5)*.04;
+    points.scale.set(s,s,s);
+
+    renderer.render(scene, camera);
+  }
+  animate();
+
+  window.addEventListener('resize', ()=>{
+    renderer.setSize(innerWidth, innerHeight);
+    camera.aspect = innerWidth/innerHeight;
+    camera.updateProjectionMatrix();
+  });
+})();
+
+// ─────────────────────────────────────────────
+// GSAP ANIMATIONS
+// ─────────────────────────────────────────────
+gsap.registerPlugin(ScrollTrigger);
+
+const tl = gsap.timeline({ delay:.3 });
+tl.to('.hero-eyebrow', { opacity:1, y:0, duration:.8, ease:'power3.out' })
+  .to('.hero-title',   { opacity:1, y:0, duration:1,  ease:'power3.out' }, '-=.4')
+  .to('.hero-sub',     { opacity:1, y:0, duration:.8, ease:'power3.out' }, '-=.5')
+  .to('.scroll-hint',  { opacity:.6, duration:.8 }, '-=.2');
+
+// Cards scroll-triggered
+gsap.utils.toArray('.card').forEach((card, i) => {
+  gsap.to(card, {
+    opacity:1, y:0,
+    duration:.9, ease:'power3.out',
+    delay: i * .12,
+    scrollTrigger: {
+      trigger: card,
+      start: 'top 85%',
+    }
+  });
+});
+
+// ─────────────────────────────────────────────
+// TYPED.JS
+// ─────────────────────────────────────────────
+new Typed('#typed-text', {
+  strings: [
+    'ثلاث تجارب تفاعلية في عالم واحد',
+    'آلة حاسبة علمية متقدمة',
+    'لعبة ذاكرة مثيرة مع تأثيرات بصرية',
+    'استكشف أعلام دول العالم',
+    'مبني بأحدث تقنيات الويب'
+  ],
+  typeSpeed: 45,
+  backSpeed: 20,
+  backDelay: 2000,
+  loop: true,
+  cursorChar: '|'
+});
+</script>
 </body>
 </html>

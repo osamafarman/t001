@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXUS — أعلام الدول</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Tajawal:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#02040a;--c1:#00f5ff;--c2:#ff2d7a;--c3:#7c3aed;--c4:#00ff88;
+  --gold:#ffd700;--text:#e8f4f8;--muted:#3a4a5c;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'Tajawal',sans-serif;min-height:100vh;overflow-x:hidden;cursor:none;}
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse 80% 50% at 80% 20%, rgba(124,58,237,.07),transparent 60%),
+             radial-gradient(ellipse 50% 60% at 10% 80%, rgba(0,245,255,.05),transparent 60%);
+}
+#cursor{position:fixed;width:10px;height:10px;background:#a78bfa;border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);box-shadow:0 0 15px var(--c3);}
+#cursor-ring{position:fixed;width:36px;height:36px;border:1px solid rgba(124,58,237,.5);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:all .1s ease-out;}
+
+nav{position:fixed;top:0;left:0;right:0;z-index:200;display:flex;align-items:center;justify-content:space-between;padding:18px 48px;background:rgba(2,4,10,0.8);backdrop-filter:blur(24px);border-bottom:1px solid rgba(124,58,237,.15);}
+.logo{font-family:'Orbitron',monospace;font-weight:900;font-size:18px;color:var(--c1);letter-spacing:4px;text-decoration:none;}
+.logo .dot{color:var(--c2);}
+nav ul{display:flex;gap:28px;list-style:none;}
+nav a:not(.logo){color:var(--muted);text-decoration:none;font-size:12px;font-weight:500;letter-spacing:3px;text-transform:uppercase;transition:color .3s;}
+nav a:not(.logo):hover,nav a:not(.logo).active{color:#a78bfa;}
+
+/* ── LAYOUT ── */
+.page-wrap{
+  position:relative;z-index:1;
+  padding:110px 24px 60px;
+  display:grid;
+  grid-template-columns:280px 1fr;
+  gap:24px;
+  max-width:1280px;margin:0 auto;
+}
+@media(max-width:900px){.page-wrap{grid-template-columns:1fr;}}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  display:flex;flex-direction:column;gap:20px;
+  position:sticky;top:100px;height:fit-content;
+}
+.sidebar-card{
+  background:rgba(5,10,20,.9);
+  border:1px solid rgba(124,58,237,.15);
+  border-radius:20px;padding:20px;
+  opacity:0;transform:translateX(-30px);
+}
+.panel-title{
+  font-family:'Orbitron',monospace;font-size:10px;letter-spacing:3px;
+  color:#a78bfa;margin-bottom:16px;
+  display:flex;align-items:center;gap:8px;
+}
+.panel-title::after{content:'';flex:1;height:1px;background:rgba(124,58,237,.2);}
+
+/* Search */
+.search-wrap{position:relative;}
+.search-wrap::before{content:'🔍';position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:14px;pointer-events:none;}
+#searchInput{
+  width:100%;padding:12px 42px 12px 16px;
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(124,58,237,.2);
+  border-radius:12px;color:var(--text);
+  font-family:'Tajawal',sans-serif;font-size:14px;
+  outline:none;transition:all .3s;
+}
+#searchInput:focus{border-color:rgba(124,58,237,.5);box-shadow:0 0 20px rgba(124,58,237,.1);}
+#searchInput::placeholder{color:var(--muted);}
+
+/* Filters */
+.filter-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.fb{
+  padding:9px 12px;border-radius:10px;border:none;cursor:pointer;
+  background:rgba(255,255,255,.03);color:var(--muted);
+  font-family:'Tajawal',sans-serif;font-size:13px;font-weight:600;
+  border:1px solid rgba(255,255,255,.06);transition:all .3s;
+  text-align:center;
+}
+.fb.active{background:rgba(124,58,237,.15);color:#a78bfa;border-color:rgba(124,58,237,.3);}
+.fb:hover{background:rgba(124,58,237,.08);}
+.fb-all{grid-column:span 2;}
+
+/* Chart */
+#regionChart{height:180px!important;}
+
+/* Counter */
+.count-badge{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 14px;background:rgba(255,255,255,.02);
+  border-radius:10px;border:1px solid rgba(255,255,255,.04);
+  font-size:13px;color:var(--muted);
+}
+.count-badge span{
+  font-family:'Orbitron',monospace;font-size:18px;color:#a78bfa;
+}
+
+/* ── MAIN GRID ── */
+.main-content{opacity:0;transform:translateY(20px);}
+
+#grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(140px,1fr));
+  gap:14px;
+}
+
+.country-card{
+  background:rgba(255,255,255,.02);
+  border:1px solid rgba(124,58,237,.1);
+  border-radius:16px;padding:18px 14px;
+  text-align:center;cursor:pointer;
+  transition:all .35s cubic-bezier(.23,1,.32,1);
+  position:relative;overflow:hidden;
+}
+.country-card::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(circle at 50% 0%, rgba(124,58,237,.12),transparent 70%);
+  opacity:0;transition:opacity .4s;
+}
+.country-card:hover{transform:translateY(-6px);border-color:rgba(124,58,237,.35);box-shadow:0 12px 32px rgba(124,58,237,.12);}
+.country-card:hover::before{opacity:1;}
+
+.cf-flag{font-size:42px;display:block;margin-bottom:10px;line-height:1;}
+.cf-ar{font-size:13px;font-weight:700;color:var(--text);margin-bottom:2px;}
+.cf-en{font-size:10px;color:var(--muted);letter-spacing:1px;}
+.cf-tag{display:inline-block;margin-top:8px;padding:3px 10px;border-radius:100px;font-size:9px;letter-spacing:1px;}
+
+.no-res{grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--muted);}
+
+/* ── MODAL ── */
+.modal-ov{
+  display:none;position:fixed;inset:0;z-index:300;
+  background:rgba(2,4,10,.93);backdrop-filter:blur(16px);
+  align-items:center;justify-content:center;padding:20px;
+}
+.modal-ov.show{display:flex;}
+.modal{
+  background:rgba(8,15,28,.99);
+  border:1px solid rgba(124,58,237,.25);
+  border-radius:28px;padding:36px;
+  max-width:560px;width:100%;
+  max-height:90vh;overflow-y:auto;
+  position:relative;
+}
+.modal::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--c3),transparent);
+}
+.m-close{
+  position:absolute;top:16px;left:16px;
+  background:rgba(255,255,255,.05);border:none;border-radius:8px;
+  width:36px;height:36px;cursor:pointer;color:var(--muted);font-size:18px;
+  display:flex;align-items:center;justify-content:center;transition:all .2s;
+}
+.m-close:hover{background:rgba(255,45,122,.1);color:var(--c2);}
+.m-flag{font-size:80px;text-align:center;display:block;margin-bottom:16px;}
+.m-en{font-family:'Orbitron',monospace;font-size:18px;text-align:center;color:var(--text);}
+.m-ar{font-size:30px;font-weight:900;text-align:center;color:#a78bfa;margin-bottom:28px;}
+
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;}
+.info-box{
+  background:rgba(255,255,255,.03);
+  border:1px solid rgba(255,255,255,.05);
+  border-radius:12px;padding:12px 14px;
+}
+.info-box label{font-size:9px;letter-spacing:2px;color:var(--muted);display:block;margin-bottom:4px;}
+.info-box span{font-size:14px;font-weight:600;color:var(--text);}
+
+/* Modal chart */
+.m-chart-title{
+  font-family:'Orbitron',monospace;font-size:10px;letter-spacing:3px;
+  color:var(--c1);margin-bottom:12px;opacity:.7;
+}
+#modalChart{width:100%!important;height:140px!important;}
+
+/* Region color dots */
+.region-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px;}
+</style>
+</head>
+<body>
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<nav>
+  <a href="index.html" class="logo">NEX<span class="dot">.</span>US</a>
+  <ul>
+    <li><a href="calculator.html">الحاسبة</a></li>
+    <li><a href="game.html">اللعبة</a></li>
+    <li><a href="flags.html" class="active">الأعلام</a></li>
+  </ul>
+</nav>
+
+<div class="page-wrap">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+
+    <div class="sidebar-card" id="sc1">
+      <div class="panel-title">بحث</div>
+      <div class="search-wrap">
+        <input type="text" id="searchInput" placeholder="ابحث عن دولة..." oninput="filterAll()">
+      </div>
+    </div>
+
+    <div class="sidebar-card" id="sc2">
+      <div class="panel-title">تصفية حسب القارة</div>
+      <div class="filter-grid">
+        <button class="fb fb-all active" id="fall" onclick="setRegion('all',this)">الكل</button>
+        <button class="fb" id="fasia"  onclick="setRegion('آسيا',this)">🌏 آسيا</button>
+        <button class="fb" id="feur"   onclick="setRegion('أوروبا',this)">🌍 أوروبا</button>
+        <button class="fb" id="fafr"   onclick="setRegion('أفريقيا',this)">🌍 أفريقيا</button>
+        <button class="fb" id="fam"    onclick="setRegion('أمريكا',this)">🌎 أمريكا</button>
+        <button class="fb" id="foce"   onclick="setRegion('أوقيانوسيا',this)">🌊 أوقيانوسيا</button>
+      </div>
+    </div>
+
+    <div class="sidebar-card" id="sc3">
+      <div class="panel-title">توزيع الدول</div>
+      <canvas id="regionChart"></canvas>
+    </div>
+
+    <div class="sidebar-card" id="sc4">
+      <div class="panel-title">الإجمالي</div>
+      <div class="count-badge">
+        <span>دول معروضة</span>
+        <span id="countNum">0</span>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main-content" id="mainContent">
+    <div id="grid"></div>
+  </div>
+
+</div>
+
+<!-- MODAL -->
+<div class="modal-ov" id="modalOv">
+  <div class="modal" id="modalBox">
+    <button class="m-close" onclick="closeModal()">✕</button>
+    <span class="m-flag" id="mFlag"></span>
+    <div class="m-en" id="mEn"></div>
+    <div class="m-ar" id="mAr"></div>
+    <div class="info-grid">
+      <div class="info-box"><label>العاصمة</label><span id="mCap"></span></div>
+      <div class="info-box"><label>القارة</label><span id="mReg"></span></div>
+      <div class="info-box"><label>السكان</label><span id="mPop"></span></div>
+      <div class="info-box"><label>العملة</label><span id="mCur"></span></div>
+      <div class="info-box"><label>اللغة</label><span id="mLang"></span></div>
+      <div class="info-box"><label>رمز الدولة</label><span id="mCode"></span></div>
+    </div>
+    <div class="m-chart-title">إحصائيات المنطقة</div>
+    <canvas id="modalChart"></canvas>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+
+<script>
+// ── CURSOR ──
+const cur=document.getElementById('cursor'),ring=document.getElementById('cursor-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;gsap.to(cur,{x:mx,y:my,duration:.05});});
+(function ar(){rx+=(mx-rx)*.1;ry+=(my-ry)*.1;gsap.set(ring,{x:rx,y:ry});requestAnimationFrame(ar);})();
+
+// ── DATA ──
+const REGION_CFG={
+  'آسيا':     {color:'rgba(0,245,255,.8)',   bg:'rgba(0,245,255,.1)',   txt:'#00f5ff'},
+  'أوروبا':   {color:'rgba(167,139,250,.8)', bg:'rgba(167,139,250,.1)', txt:'#a78bfa'},
+  'أفريقيا':  {color:'rgba(255,165,0,.8)',   bg:'rgba(255,165,0,.1)',   txt:'#ffa500'},
+  'أمريكا':   {color:'rgba(255,45,122,.8)',  bg:'rgba(255,45,122,.1)',  txt:'#ff2d7a'},
+  'أوقيانوسيا':{color:'rgba(0,255,136,.8)',  bg:'rgba(0,255,136,.1)',   txt:'#00ff88'},
+};
+
+const COUNTRIES=[
+  {flag:'🇸🇦',ar:'المملكة العربية السعودية',en:'Saudi Arabia',capital:'الرياض',region:'آسيا',pop:35,popText:'35M',currency:'ريال سعودي',lang:'العربية',code:'SA'},
+  {flag:'🇹🇷',ar:'تركيا',en:'Turkey',capital:'أنقرة',region:'آسيا',pop:85,popText:'85M',currency:'ليرة تركية',lang:'التركية',code:'TR'},
+  {flag:'🇸🇾',ar:'سوريا',en:'Syria',capital:'دمشق',region:'آسيا',pop:21,popText:'21M',currency:'ليرة سورية',lang:'العربية',code:'SY'},
+  {flag:'🇪🇬',ar:'مصر',en:'Egypt',capital:'القاهرة',region:'أفريقيا',pop:104,popText:'104M',currency:'جنيه مصري',lang:'العربية',code:'EG'},
+  {flag:'🇾🇪',ar:'اليمن',en:'Yemen',capital:'صنعاء',region:'آسيا',pop:33,popText:'33M',currency:'ريال يمني',lang:'العربية',code:'YE'},
+  {flag:'🇮🇶',ar:'العراق',en:'Iraq',capital:'بغداد',region:'آسيا',pop:41,popText:'41M',currency:'دينار عراقي',lang:'العربية / الكردية',code:'IQ'},
+  {flag:'🇯🇴',ar:'الأردن',en:'Jordan',capital:'عمّان',region:'آسيا',pop:10,popText:'10M',currency:'دينار أردني',lang:'العربية',code:'JO'},
+  {flag:'🇱🇧',ar:'لبنان',en:'Lebanon',capital:'بيروت',region:'آسيا',pop:7,popText:'6.8M',currency:'ليرة لبنانية',lang:'العربية',code:'LB'},
+  {flag:'🇵🇸',ar:'فلسطين',en:'Palestine',capital:'القدس',region:'آسيا',pop:5,popText:'5.3M',currency:'شيكل',lang:'العربية',code:'PS'},
+  {flag:'🇰🇼',ar:'الكويت',en:'Kuwait',capital:'مدينة الكويت',region:'آسيا',pop:4,popText:'4.3M',currency:'دينار كويتي',lang:'العربية',code:'KW'},
+  {flag:'🇦🇪',ar:'الإمارات',en:'UAE',capital:'أبوظبي',region:'آسيا',pop:10,popText:'9.8M',currency:'درهم إماراتي',lang:'العربية',code:'AE'},
+  {flag:'🇶🇦',ar:'قطر',en:'Qatar',capital:'الدوحة',region:'آسيا',pop:3,popText:'2.9M',currency:'ريال قطري',lang:'العربية',code:'QA'},
+  {flag:'🇧🇭',ar:'البحرين',en:'Bahrain',capital:'المنامة',region:'آسيا',pop:2,popText:'1.7M',currency:'دينار بحريني',lang:'العربية',code:'BH'},
+  {flag:'🇴🇲',ar:'عُمان',en:'Oman',capital:'مسقط',region:'آسيا',pop:5,popText:'4.5M',currency:'ريال عُماني',lang:'العربية',code:'OM'},
+  {flag:'🇮🇷',ar:'إيران',en:'Iran',capital:'طهران',region:'آسيا',pop:86,popText:'86M',currency:'ريال إيراني',lang:'الفارسية',code:'IR'},
+  {flag:'🇵🇰',ar:'باكستان',en:'Pakistan',capital:'إسلام آباد',region:'آسيا',pop:220,popText:'220M',currency:'روبية باكستانية',lang:'الأردية',code:'PK'},
+  {flag:'🇮🇳',ar:'الهند',en:'India',capital:'نيودلهي',region:'آسيا',pop:1400,popText:'1.4B',currency:'روبية هندية',lang:'الهندية',code:'IN'},
+  {flag:'🇨🇳',ar:'الصين',en:'China',capital:'بكين',region:'آسيا',pop:1400,popText:'1.4B',currency:'يوان صيني',lang:'الصينية',code:'CN'},
+  {flag:'🇯🇵',ar:'اليابان',en:'Japan',capital:'طوكيو',region:'آسيا',pop:125,popText:'125M',currency:'ين ياباني',lang:'اليابانية',code:'JP'},
+  {flag:'🇰🇷',ar:'كوريا الجنوبية',en:'South Korea',capital:'سيول',region:'آسيا',pop:52,popText:'52M',currency:'وون كوري',lang:'الكورية',code:'KR'},
+  {flag:'🇮🇩',ar:'إندونيسيا',en:'Indonesia',capital:'جاكرتا',region:'آسيا',pop:275,popText:'275M',currency:'روبية إندونيسية',lang:'الإندونيسية',code:'ID'},
+  {flag:'🇲🇾',ar:'ماليزيا',en:'Malaysia',capital:'كوالالمبور',region:'آسيا',pop:33,popText:'33M',currency:'رينغيت',lang:'الملايو',code:'MY'},
+  {flag:'🇹🇭',ar:'تايلاند',en:'Thailand',capital:'بانكوك',region:'آسيا',pop:70,popText:'70M',currency:'بات',lang:'التايلاندية',code:'TH'},
+  {flag:'🇦🇫',ar:'أفغانستان',en:'Afghanistan',capital:'كابول',region:'آسيا',pop:40,popText:'40M',currency:'أفغاني',lang:'الباشتو',code:'AF'},
+  {flag:'🇺🇸',ar:'الولايات المتحدة',en:'United States',capital:'واشنطن',region:'أمريكا',pop:331,popText:'331M',currency:'دولار أمريكي',lang:'الإنجليزية',code:'US'},
+  {flag:'🇨🇦',ar:'كندا',en:'Canada',capital:'أوتاوا',region:'أمريكا',pop:38,popText:'38M',currency:'دولار كندي',lang:'الإنجليزية / الفرنسية',code:'CA'},
+  {flag:'🇧🇷',ar:'البرازيل',en:'Brazil',capital:'برازيليا',region:'أمريكا',pop:214,popText:'214M',currency:'ريال برازيلي',lang:'البرتغالية',code:'BR'},
+  {flag:'🇲🇽',ar:'المكسيك',en:'Mexico',capital:'مكسيكو سيتي',region:'أمريكا',pop:130,popText:'130M',currency:'بيسو مكسيكي',lang:'الإسبانية',code:'MX'},
+  {flag:'🇦🇷',ar:'الأرجنتين',en:'Argentina',capital:'بوينس آيرس',region:'أمريكا',pop:45,popText:'45M',currency:'بيسو أرجنتيني',lang:'الإسبانية',code:'AR'},
+  {flag:'🇨🇴',ar:'كولومبيا',en:'Colombia',capital:'بوغوتا',region:'أمريكا',pop:51,popText:'51M',currency:'بيسو كولومبي',lang:'الإسبانية',code:'CO'},
+  {flag:'🇬🇧',ar:'المملكة المتحدة',en:'United Kingdom',capital:'لندن',region:'أوروبا',pop:67,popText:'67M',currency:'جنيه إسترليني',lang:'الإنجليزية',code:'GB'},
+  {flag:'🇩🇪',ar:'ألمانيا',en:'Germany',capital:'برلين',region:'أوروبا',pop:84,popText:'84M',currency:'يورو',lang:'الألمانية',code:'DE'},
+  {flag:'🇫🇷',ar:'فرنسا',en:'France',capital:'باريس',region:'أوروبا',pop:67,popText:'67M',currency:'يورو',lang:'الفرنسية',code:'FR'},
+  {flag:'🇮🇹',ar:'إيطاليا',en:'Italy',capital:'روما',region:'أوروبا',pop:60,popText:'60M',currency:'يورو',lang:'الإيطالية',code:'IT'},
+  {flag:'🇪🇸',ar:'إسبانيا',en:'Spain',capital:'مدريد',region:'أوروبا',pop:47,popText:'47M',currency:'يورو',lang:'الإسبانية',code:'ES'},
+  {flag:'🇷🇺',ar:'روسيا',en:'Russia',capital:'موسكو',region:'أوروبا',pop:145,popText:'145M',currency:'روبل روسي',lang:'الروسية',code:'RU'},
+  {flag:'🇳🇱',ar:'هولندا',en:'Netherlands',capital:'أمستردام',region:'أوروبا',pop:17,popText:'17M',currency:'يورو',lang:'الهولندية',code:'NL'},
+  {flag:'🇧🇪',ar:'بلجيكا',en:'Belgium',capital:'بروكسل',region:'أوروبا',pop:11,popText:'11M',currency:'يورو',lang:'الهولندية / الفرنسية',code:'BE'},
+  {flag:'🇵🇱',ar:'بولندا',en:'Poland',capital:'وارسو',region:'أوروبا',pop:38,popText:'38M',currency:'زلوتي',lang:'البولندية',code:'PL'},
+  {flag:'🇵🇹',ar:'البرتغال',en:'Portugal',capital:'لشبونة',region:'أوروبا',pop:10,popText:'10M',currency:'يورو',lang:'البرتغالية',code:'PT'},
+  {flag:'🇸🇪',ar:'السويد',en:'Sweden',capital:'ستوكهولم',region:'أوروبا',pop:10,popText:'10M',currency:'كرونة سويدية',lang:'السويدية',code:'SE'},
+  {flag:'🇳🇴',ar:'النرويج',en:'Norway',capital:'أوسلو',region:'أوروبا',pop:5,popText:'5.4M',currency:'كرونة نرويجية',lang:'النرويجية',code:'NO'},
+  {flag:'🇨🇭',ar:'سويسرا',en:'Switzerland',capital:'برن',region:'أوروبا',pop:9,popText:'8.6M',currency:'فرنك سويسري',lang:'الألمانية / الفرنسية',code:'CH'},
+  {flag:'🇦🇹',ar:'النمسا',en:'Austria',capital:'فيينا',region:'أوروبا',pop:9,popText:'9M',currency:'يورو',lang:'الألمانية',code:'AT'},
+  {flag:'🇬🇷',ar:'اليونان',en:'Greece',capital:'أثينا',region:'أوروبا',pop:11,popText:'10.7M',currency:'يورو',lang:'اليونانية',code:'GR'},
+  {flag:'🇺🇦',ar:'أوكرانيا',en:'Ukraine',capital:'كييف',region:'أوروبا',pop:44,popText:'44M',currency:'هريفنيا',lang:'الأوكرانية',code:'UA'},
+  {flag:'🇳🇬',ar:'نيجيريا',en:'Nigeria',capital:'أبوجا',region:'أفريقيا',pop:216,popText:'216M',currency:'نيرة نيجيرية',lang:'الإنجليزية',code:'NG'},
+  {flag:'🇰🇪',ar:'كينيا',en:'Kenya',capital:'نيروبي',region:'أفريقيا',pop:54,popText:'54M',currency:'شلن كيني',lang:'السواحلية',code:'KE'},
+  {flag:'🇿🇦',ar:'جنوب أفريقيا',en:'South Africa',capital:'بريتوريا',region:'أفريقيا',pop:60,popText:'60M',currency:'راند',lang:'الزولو / الإنجليزية',code:'ZA'},
+  {flag:'🇪🇹',ar:'إثيوبيا',en:'Ethiopia',capital:'أديس أبابا',region:'أفريقيا',pop:120,popText:'120M',currency:'بير إثيوبي',lang:'الأمهرية',code:'ET'},
+  {flag:'🇬🇭',ar:'غانا',en:'Ghana',capital:'أكرا',region:'أفريقيا',pop:32,popText:'32M',currency:'سيدي غاني',lang:'الإنجليزية',code:'GH'},
+  {flag:'🇹🇳',ar:'تونس',en:'Tunisia',capital:'تونس',region:'أفريقيا',pop:12,popText:'12M',currency:'دينار تونسي',lang:'العربية',code:'TN'},
+  {flag:'🇩🇿',ar:'الجزائر',en:'Algeria',capital:'الجزائر',region:'أفريقيا',pop:45,popText:'45M',currency:'دينار جزائري',lang:'العربية',code:'DZ'},
+  {flag:'🇲🇦',ar:'المغرب',en:'Morocco',capital:'الرباط',region:'أفريقيا',pop:37,popText:'37M',currency:'درهم مغربي',lang:'العربية',code:'MA'},
+  {flag:'🇱🇾',ar:'ليبيا',en:'Libya',capital:'طرابلس',region:'أفريقيا',pop:7,popText:'7M',currency:'دينار ليبي',lang:'العربية',code:'LY'},
+  {flag:'🇸🇩',ar:'السودان',en:'Sudan',capital:'الخرطوم',region:'أفريقيا',pop:45,popText:'45M',currency:'جنيه سوداني',lang:'العربية',code:'SD'},
+  {flag:'🇸🇴',ar:'الصومال',en:'Somalia',capital:'مقديشو',region:'أفريقيا',pop:17,popText:'17M',currency:'شلن صومالي',lang:'الصومالية',code:'SO'},
+  {flag:'🇦🇺',ar:'أستراليا',en:'Australia',capital:'كانبيرا',region:'أوقيانوسيا',pop:26,popText:'26M',currency:'دولار أسترالي',lang:'الإنجليزية',code:'AU'},
+  {flag:'🇳🇿',ar:'نيوزيلندا',en:'New Zealand',capital:'ويلينغتون',region:'أوقيانوسيا',pop:5,popText:'5M',currency:'دولار نيوزيلندي',lang:'الإنجليزية',code:'NZ'},
+  {flag:'🇫🇯',ar:'فيجي',en:'Fiji',capital:'سوفا',region:'أوقيانوسيا',pop:1,popText:'930K',currency:'دولار فيجي',lang:'الإنجليزية',code:'FJ'},
+];
+
+// ── STATE ──
+let currentRegion='all';
+let modalChartInstance=null;
+
+// ── GSAP ENTRANCE ──
+gsap.to('.main-content',{opacity:1,y:0,duration:.8,delay:.5,ease:'power3.out'});
+gsap.to('#sc1',{opacity:1,x:0,duration:.7,delay:.3,ease:'power3.out'});
+gsap.to('#sc2',{opacity:1,x:0,duration:.7,delay:.4,ease:'power3.out'});
+gsap.to('#sc3',{opacity:1,x:0,duration:.7,delay:.5,ease:'power3.out'});
+gsap.to('#sc4',{opacity:1,x:0,duration:.7,delay:.6,ease:'power3.out'});
+
+// ── DONUT CHART ──
+const regionCounts={};
+COUNTRIES.forEach(c=>{ regionCounts[c.region]=(regionCounts[c.region]||0)+1; });
+const rcLabels=Object.keys(regionCounts);
+const rcData=rcLabels.map(r=>regionCounts[r]);
+const rcColors=rcLabels.map(r=>REGION_CFG[r]?.color||'#fff');
+
+const regionChart=new Chart(document.getElementById('regionChart'),{
+  type:'doughnut',
+  data:{labels:rcLabels,datasets:[{data:rcData,backgroundColor:rcColors,borderColor:'rgba(5,10,20,.8)',borderWidth:3,hoverOffset:8}]},
+  options:{
+    responsive:true,maintainAspectRatio:false,
+    cutout:'68%',
+    plugins:{
+      legend:{
+        position:'bottom',
+        labels:{color:'rgba(255,255,255,.5)',font:{size:10},padding:10,boxWidth:8,usePointStyle:true}
+      },
+      tooltip:{
+        backgroundColor:'rgba(5,10,20,.95)',borderColor:'rgba(124,58,237,.3)',borderWidth:1,
+        callbacks:{label:c=>`${c.label}: ${c.parsed} دولة`}
+      }
+    },
+    animation:{duration:1000,easing:'easeInOutQuart'}
+  }
+});
+
+// ── RENDER ──
+function renderGrid(list){
+  document.getElementById('countNum').textContent=list.length;
+  const grid=document.getElementById('grid');
+
+  if(!list.length){
+    grid.innerHTML=`<div class="no-res"><div style="font-size:48px;opacity:.2;margin-bottom:12px">🔍</div><p>لا توجد نتائج</p></div>`;
+    return;
+  }
+
+  const html=list.map((c,i)=>{
+    const rc=REGION_CFG[c.region]||{bg:'rgba(255,255,255,.1)',txt:'#fff'};
+    return `<div class="country-card" onclick="openModal(${COUNTRIES.indexOf(c)})" data-idx="${i}">
+      <span class="cf-flag">${c.flag}</span>
+      <div class="cf-ar">${c.ar}</div>
+      <div class="cf-en">${c.en}</div>
+      <span class="cf-tag" style="background:${rc.bg};color:${rc.txt}">${c.region}</span>
+    </div>`;
+  }).join('');
+
+  grid.innerHTML=html;
+
+  // GSAP stagger entrance
+  gsap.fromTo('.country-card',
+    {opacity:0,y:20,scale:.95},
+    {opacity:1,y:0,scale:1,stagger:{amount:.5,from:'start'},duration:.4,ease:'power2.out'}
+  );
+}
+
+function setRegion(region,btn){
+  currentRegion=region;
+  document.querySelectorAll('.fb').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+
+  // Button press animation
+  gsap.fromTo(btn,{scale:.9},{scale:1,duration:.3,ease:'elastic.out(1,.5)'});
+
+  filterAll();
+}
+
+function filterAll(){
+  const q=document.getElementById('searchInput').value.trim().toLowerCase();
+  let list=COUNTRIES;
+  if(currentRegion!=='all') list=list.filter(c=>c.region===currentRegion);
+  if(q) list=list.filter(c=>c.ar.includes(q)||c.en.toLowerCase().includes(q)||c.code.toLowerCase().includes(q));
+  renderGrid(list);
+}
+
+// ── MODAL ──
+function openModal(idx){
+  const c=COUNTRIES[idx];
+  document.getElementById('mFlag').textContent=c.flag;
+  document.getElementById('mEn').textContent=c.en;
+  document.getElementById('mAr').textContent=c.ar;
+  document.getElementById('mCap').textContent=c.capital;
+  document.getElementById('mReg').textContent=c.region;
+  document.getElementById('mPop').textContent=c.popText;
+  document.getElementById('mCur').textContent=c.currency;
+  document.getElementById('mLang').textContent=c.lang;
+  document.getElementById('mCode').textContent=c.code;
+
+  // Build regional population bar chart
+  if(modalChartInstance) modalChartInstance.destroy();
+  const regionPeers=COUNTRIES.filter(x=>x.region===c.region).sort((a,b)=>b.pop-a.pop).slice(0,6);
+  const rc=REGION_CFG[c.region];
+
+  modalChartInstance=new Chart(document.getElementById('modalChart'),{
+    type:'bar',
+    data:{
+      labels:regionPeers.map(x=>x.ar),
+      datasets:[{
+        data:regionPeers.map(x=>x.pop),
+        backgroundColor:regionPeers.map(x=>x.code===c.code?(rc?.color||'rgba(167,139,250,.8)'):'rgba(255,255,255,.1)'),
+        borderColor:regionPeers.map(x=>x.code===c.code?(rc?.color||'rgba(167,139,250,1)'):'rgba(255,255,255,.05)'),
+        borderWidth:1,borderRadius:6
+      }]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{
+        backgroundColor:'rgba(5,10,20,.95)',borderColor:rc?.color||'rgba(255,255,255,.2)',borderWidth:1,
+        callbacks:{label:ctx=>`السكان: ${ctx.parsed.y}M`}
+      }},
+      scales:{
+        x:{ticks:{color:'rgba(255,255,255,.4)',font:{size:9}},grid:{display:false}},
+        y:{ticks:{color:'rgba(255,255,255,.3)',font:{size:9}},grid:{color:'rgba(255,255,255,.04)',drawBorder:false}}
+      },
+      animation:{duration:600}
+    }
+  });
+
+  document.getElementById('modalOv').classList.add('show');
+  gsap.fromTo('#modalBox',
+    {scale:.75,y:30,opacity:0},
+    {scale:1,y:0,opacity:1,duration:.55,ease:'back.out(1.6)'}
+  );
+}
+
+function closeModal(){
+  gsap.to('#modalBox',{scale:.85,opacity:0,y:20,duration:.25,ease:'power2.in',onComplete:()=>{
+    document.getElementById('modalOv').classList.remove('show');
+  }});
+}
+
+document.getElementById('modalOv').addEventListener('click',function(e){if(e.target===this)closeModal();});
+
+// INIT
+renderGrid(COUNTRIES);
+</script>
+</body>
+</html>

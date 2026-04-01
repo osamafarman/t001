@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXUS — الآلة الحاسبة</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Tajawal:wght@300;400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#02040a;--c1:#00f5ff;--c2:#ff2d7a;--c3:#7c3aed;--c4:#00ff88;
+  --text:#e8f4f8;--muted:#3a4a5c;--glass:rgba(0,245,255,.03);
+  --border:rgba(0,245,255,0.12);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  background:var(--bg);color:var(--text);
+  font-family:'Tajawal',sans-serif;min-height:100vh;
+  overflow-x:hidden;cursor:none;
+}
+body::before{
+  content:'';position:fixed;inset:0;
+  background:
+    radial-gradient(ellipse 80% 50% at 20% 20%, rgba(0,245,255,.05) 0%,transparent 60%),
+    radial-gradient(ellipse 60% 60% at 80% 80%, rgba(124,58,237,.07) 0%,transparent 60%);
+  pointer-events:none;z-index:0;
+}
+#cursor{position:fixed;width:10px;height:10px;background:var(--c1);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);box-shadow:0 0 15px var(--c1);}
+#cursor-ring{position:fixed;width:36px;height:36px;border:1px solid rgba(0,245,255,.4);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:all .1s ease-out;}
+
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 48px;background:rgba(2,4,10,0.8);
+  backdrop-filter:blur(24px);border-bottom:1px solid var(--border);
+}
+.logo{font-family:'Orbitron',monospace;font-weight:900;font-size:18px;color:var(--c1);letter-spacing:4px;text-decoration:none;text-shadow:0 0 20px rgba(0,245,255,.4);}
+.logo .dot{color:var(--c2);}
+nav ul{display:flex;gap:28px;list-style:none;}
+nav a:not(.logo){color:var(--muted);text-decoration:none;font-size:12px;font-weight:500;letter-spacing:3px;text-transform:uppercase;transition:color .3s;}
+nav a:not(.logo):hover,nav a:not(.logo).active{color:var(--c1);}
+
+main{
+  position:relative;z-index:1;
+  padding:110px 24px 60px;
+  display:flex;flex-direction:column;align-items:center;
+  gap:32px;
+}
+
+.page-label{
+  font-family:'Orbitron',monospace;font-size:11px;
+  letter-spacing:5px;color:var(--c1);opacity:.7;
+}
+
+/* ── LAYOUT ── */
+.calc-layout{
+  display:flex;gap:28px;align-items:flex-start;
+  flex-wrap:wrap;justify-content:center;
+  width:100%;max-width:900px;
+}
+
+/* ── CALCULATOR ── */
+.calc-wrap{
+  width:360px;flex-shrink:0;
+  background:rgba(5,10,20,.95);
+  border:1px solid rgba(0,245,255,.15);
+  border-radius:28px;padding:24px;
+  box-shadow:0 0 0 1px rgba(0,245,255,.04),0 24px 80px rgba(0,0,0,.7),0 0 80px rgba(0,245,255,.05);
+  opacity:0;transform:translateX(-40px);
+}
+
+/* MODE TOGGLE */
+.mode-row{
+  display:flex;gap:8px;margin-bottom:16px;
+}
+.mode-btn{
+  flex:1;height:34px;border-radius:8px;border:none;cursor:pointer;
+  font-family:'Orbitron',monospace;font-size:10px;letter-spacing:2px;
+  background:rgba(255,255,255,.03);color:var(--muted);
+  border:1px solid rgba(255,255,255,.05);transition:all .3s;
+}
+.mode-btn.active{
+  background:rgba(0,245,255,.1);color:var(--c1);
+  border-color:rgba(0,245,255,.25);
+  box-shadow:0 0 12px rgba(0,245,255,.1);
+}
+
+/* DISPLAY */
+.display{
+  background:rgba(0,0,0,.55);
+  border:1px solid rgba(0,245,255,.1);
+  border-radius:16px;padding:18px 20px;
+  margin-bottom:16px;min-height:120px;
+  display:flex;flex-direction:column;justify-content:flex-end;
+  position:relative;overflow:hidden;
+}
+.display-scan{/* scanline effect */
+  position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,245,255,.015) 2px,rgba(0,245,255,.015) 4px);
+}
+.display-glow{
+  position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,transparent,var(--c1),transparent);
+  opacity:.5;animation:glowScan 3s ease-in-out infinite;
+}
+@keyframes glowScan{0%,100%{opacity:.3;}50%{opacity:.7;}}
+.display-mode-badge{
+  position:absolute;top:10px;right:12px;
+  font-family:'Orbitron',monospace;font-size:9px;letter-spacing:2px;
+  color:rgba(0,245,255,.3);
+}
+.display-tape{
+  font-family:'Share Tech Mono',monospace;font-size:11px;
+  color:rgba(0,245,255,.25);text-align:left;
+  min-height:16px;margin-bottom:4px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.display-expr{
+  font-family:'Share Tech Mono',monospace;font-size:13px;
+  color:var(--muted);text-align:left;
+  min-height:18px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  margin-bottom:8px;
+}
+.display-num{
+  font-family:'Share Tech Mono',monospace;
+  font-size:42px;text-align:left;color:var(--text);
+  line-height:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  position:relative;z-index:1;
+}
+
+/* BUTTONS */
+.btns{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+button.cb{
+  height:58px;border-radius:12px;border:none;cursor:pointer;
+  font-family:'Tajawal',sans-serif;font-size:16px;font-weight:700;
+  position:relative;overflow:hidden;outline:none;
+  transition:transform .1s;
+}
+button.cb:active{transform:scale(.89);}
+/* Ripple */
+button.cb .rip{
+  position:absolute;border-radius:50%;
+  background:rgba(255,255,255,.25);
+  transform:scale(0);animation:rip .5s ease-out forwards;
+  pointer-events:none;
+}
+@keyframes rip{to{transform:scale(4);opacity:0;}}
+
+.cn{background:rgba(255,255,255,.04);color:var(--text);border:1px solid rgba(255,255,255,.06);}
+.cn:hover{background:rgba(0,245,255,.07);border-color:rgba(0,245,255,.15);}
+.co{background:rgba(0,245,255,.07);color:var(--c1);border:1px solid rgba(0,245,255,.15);}
+.co:hover{background:rgba(0,245,255,.14);box-shadow:0 0 16px rgba(0,245,255,.12);}
+.cc{background:rgba(255,45,122,.07);color:var(--c2);border:1px solid rgba(255,45,122,.15);}
+.cc:hover{background:rgba(255,45,122,.14);}
+.cf{background:rgba(124,58,237,.07);color:#a78bfa;border:1px solid rgba(124,58,237,.15);font-size:14px;}
+.cf:hover{background:rgba(124,58,237,.14);}
+.ceq{
+  background:linear-gradient(135deg,var(--c1) 0%,#0066ff 100%);
+  color:#000;font-size:22px;font-weight:900;border:none;
+  box-shadow:0 4px 24px rgba(0,245,255,.3);
+}
+.ceq:hover{box-shadow:0 6px 32px rgba(0,245,255,.5);}
+.czero{grid-column:span 2;}
+
+/* ── RIGHT PANEL ── */
+.right-panel{
+  flex:1;min-width:260px;max-width:340px;
+  display:flex;flex-direction:column;gap:20px;
+  opacity:0;transform:translateX(40px);
+}
+
+.panel-card{
+  background:rgba(5,10,20,.9);
+  border:1px solid rgba(255,255,255,.06);
+  border-radius:20px;padding:20px;
+}
+.panel-title{
+  font-family:'Orbitron',monospace;font-size:10px;
+  letter-spacing:3px;color:var(--c1);
+  margin-bottom:16px;opacity:.7;
+  display:flex;align-items:center;gap:8px;
+}
+.panel-title::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* Chart */
+#historyChart{width:100%!important;height:180px!important;}
+
+/* History list */
+.history-list{
+  list-style:none;display:flex;flex-direction:column;gap:6px;
+  max-height:220px;overflow-y:auto;
+}
+.history-list::-webkit-scrollbar{width:3px;}
+.history-list::-webkit-scrollbar-thumb{background:rgba(0,245,255,.2);border-radius:2px;}
+.history-list li{
+  font-family:'Share Tech Mono',monospace;font-size:12px;
+  color:var(--muted);padding:8px 12px;
+  background:rgba(255,255,255,.02);border-radius:8px;
+  border:1px solid rgba(255,255,255,.04);
+  display:flex;justify-content:space-between;align-items:center;
+  transition:all .3s;
+  transform:translateX(20px);opacity:0;
+}
+.history-list li.in{transform:translateX(0);opacity:1;}
+.history-list li .res{color:var(--c1);font-size:14px;}
+
+/* Memory buttons */
+.mem-btns{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
+.mem-btn{
+  height:36px;border-radius:8px;border:none;cursor:pointer;
+  background:rgba(255,255,255,.03);
+  color:var(--muted);font-family:'Orbitron',monospace;
+  font-size:10px;letter-spacing:1px;
+  border:1px solid rgba(255,255,255,.05);transition:all .3s;
+}
+.mem-btn:hover{background:rgba(0,245,255,.08);color:var(--c1);}
+.mem-val{
+  font-family:'Share Tech Mono',monospace;font-size:13px;
+  color:var(--c4);text-align:center;padding:6px;
+  min-height:26px;
+}
+</style>
+</head>
+<body>
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<nav>
+  <a href="index.html" class="logo">NEX<span class="dot">.</span>US</a>
+  <ul>
+    <li><a href="calculator.html" class="active">الحاسبة</a></li>
+    <li><a href="game.html">اللعبة</a></li>
+    <li><a href="flags.html">الأعلام</a></li>
+  </ul>
+</nav>
+
+<main>
+  <div class="page-label">✦ SCIENTIFIC CALCULATOR ✦</div>
+
+  <div class="calc-layout">
+
+    <!-- LEFT: CALCULATOR -->
+    <div class="calc-wrap" id="calcWrap">
+      <div class="mode-row">
+        <button class="mode-btn active" id="mDeg" onclick="setMode('deg')">DEG</button>
+        <button class="mode-btn" id="mRad" onclick="setMode('rad')">RAD</button>
+        <button class="mode-btn" id="mHex" onclick="setMode('hex')">HEX</button>
+      </div>
+
+      <div class="display">
+        <div class="display-scan"></div>
+        <div class="display-glow"></div>
+        <div class="display-mode-badge" id="dMode">DEG</div>
+        <div class="display-tape" id="tape"></div>
+        <div class="display-expr" id="dExpr"></div>
+        <div class="display-num" id="dNum">0</div>
+      </div>
+
+      <div class="btns">
+        <button class="cb cf" onclick="fn('sin(')">sin</button>
+        <button class="cb cf" onclick="fn('cos(')">cos</button>
+        <button class="cb cf" onclick="fn('tan(')">tan</button>
+        <button class="cb cc" onclick="clearAll()">AC</button>
+
+        <button class="cb cf" onclick="fn('log(')">log</button>
+        <button class="cb cf" onclick="fn('ln(')">ln</button>
+        <button class="cb cf" onclick="fn('√(')">√</button>
+        <button class="cb cc" onclick="bksp()">⌫</button>
+
+        <button class="cb cf" onclick="fn('(')">( </button>
+        <button class="cb cf" onclick="fn(')')"> )</button>
+        <button class="cb cf" onclick="fn('^')">xʸ</button>
+        <button class="cb co" onclick="op('%')">%</button>
+
+        <button class="cb cn" onclick="num('7')">7</button>
+        <button class="cb cn" onclick="num('8')">8</button>
+        <button class="cb cn" onclick="num('9')">9</button>
+        <button class="cb co" onclick="op('÷')">÷</button>
+
+        <button class="cb cn" onclick="num('4')">4</button>
+        <button class="cb cn" onclick="num('5')">5</button>
+        <button class="cb cn" onclick="num('6')">6</button>
+        <button class="cb co" onclick="op('×')">×</button>
+
+        <button class="cb cn" onclick="num('1')">1</button>
+        <button class="cb cn" onclick="num('2')">2</button>
+        <button class="cb cn" onclick="num('3')">3</button>
+        <button class="cb co" onclick="op('−')">−</button>
+
+        <button class="cb cn czero" onclick="num('0')">0</button>
+        <button class="cb cn" onclick="num('.')">.</button>
+        <button class="cb co" onclick="op('+')">+</button>
+
+        <button class="cb cf" onclick="fn('π')">π</button>
+        <button class="cb cf" onclick="fn('e')">e</button>
+        <button class="cb cf" onclick="toggleSign()">±</button>
+        <button class="cb ceq" onclick="calc()">=</button>
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div class="right-panel" id="rightPanel">
+      <!-- Chart -->
+      <div class="panel-card">
+        <div class="panel-title">سجل النتائج</div>
+        <canvas id="historyChart"></canvas>
+      </div>
+
+      <!-- History list -->
+      <div class="panel-card">
+        <div class="panel-title">آخر العمليات</div>
+        <ul class="history-list" id="histList"></ul>
+      </div>
+
+      <!-- Memory -->
+      <div class="panel-card">
+        <div class="panel-title">الذاكرة</div>
+        <div class="mem-btns">
+          <button class="mem-btn" onclick="memStore()">MS</button>
+          <button class="mem-btn" onclick="memRecall()">MR</button>
+          <button class="mem-btn" onclick="memClear()">MC</button>
+          <button class="mem-btn" onclick="memAdd()">M+</button>
+          <button class="mem-btn" onclick="memSub()">M−</button>
+          <button class="mem-btn" onclick="history2Mem()">M→</button>
+        </div>
+        <div class="mem-val" id="memVal">—</div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- LIBRARIES -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+
+<script>
+// ── CURSOR ──
+const cur=document.getElementById('cursor'),ring=document.getElementById('cursor-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;gsap.to(cur,{x:mx,y:my,duration:.05});});
+(function ar(){rx+=(mx-rx)*.1;ry+=(my-ry)*.1;gsap.set(ring,{x:rx,y:ry});requestAnimationFrame(ar);})();
+
+// ── GSAP entrance ──
+gsap.to('#calcWrap',  { opacity:1, x:0, duration:.9, ease:'power3.out', delay:.3 });
+gsap.to('#rightPanel',{ opacity:1, x:0, duration:.9, ease:'power3.out', delay:.5 });
+
+// ── AUDIO (Web Audio API) ──
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let actx;
+function beep(freq=440, dur=0.06, vol=0.08){
+  if(!actx) actx = new AudioCtx();
+  const o=actx.createOscillator(), g=actx.createGain();
+  o.connect(g); g.connect(actx.destination);
+  o.frequency.value=freq;
+  g.gain.setValueAtTime(vol, actx.currentTime);
+  g.gain.exponentialRampToValueAtTime(.001, actx.currentTime+dur);
+  o.start(); o.stop(actx.currentTime+dur);
+}
+
+// ── RIPPLE ──
+function ripple(btn){
+  const r=document.createElement('span');
+  r.className='rip';
+  const s=Math.max(btn.offsetWidth,btn.offsetHeight);
+  r.style.cssText=`width:${s}px;height:${s}px;left:${btn.offsetWidth/2-s/2}px;top:${btn.offsetHeight/2-s/2}px;`;
+  btn.appendChild(r);
+  r.addEventListener('animationend',()=>r.remove());
+}
+document.querySelectorAll('.cb').forEach(b=>{
+  b.addEventListener('click',function(){
+    ripple(this);
+    gsap.fromTo(this,{scale:.88},{scale:1,duration:.25,ease:'elastic.out(1,.5)'});
+    beep(b.classList.contains('ceq')?880:b.classList.contains('co')?660:440);
+  });
+});
+
+// ── STATE ──
+let expr='', isDeg=true, mode='deg', mem=0, hist=[];
+const histData=[];
+
+// ── CHART ──
+const chartCtx = document.getElementById('historyChart').getContext('2d');
+const histChart = new Chart(chartCtx,{
+  type:'line',
+  data:{
+    labels:[],
+    datasets:[{
+      data:[],
+      borderColor:'rgba(0,245,255,.8)',
+      backgroundColor:'rgba(0,245,255,.06)',
+      pointBackgroundColor:'rgba(0,245,255,1)',
+      pointRadius:4,pointHoverRadius:7,
+      tension:.45,fill:true,
+      borderWidth:2
+    }]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false},tooltip:{
+      callbacks:{label:c=>`= ${c.parsed.y}`},
+      backgroundColor:'rgba(2,4,10,.9)',
+      borderColor:'rgba(0,245,255,.3)',borderWidth:1,
+      titleColor:'rgba(0,245,255,.7)',bodyColor:'#e8f4f8'
+    }},
+    scales:{
+      x:{display:false},
+      y:{
+        display:true,
+        grid:{color:'rgba(255,255,255,.04)',drawBorder:false},
+        ticks:{color:'rgba(255,255,255,.3)',font:{size:10},maxTicksLimit:4}
+      }
+    },
+    animation:{duration:600,easing:'easeInOutQuart'}
+  }
+});
+
+function updateChart(val){
+  if(typeof val!=='number'||!isFinite(val)) return;
+  histData.push(val);
+  if(histData.length>12) histData.shift();
+  histChart.data.labels = histData.map((_,i)=>`#${i+1}`);
+  histChart.data.datasets[0].data = [...histData];
+  histChart.update();
+}
+
+function addHistory(expr,res){
+  const li=document.createElement('li');
+  li.innerHTML=`<span>${expr}</span><span class="res">${res}</span>`;
+  const list=document.getElementById('histList');
+  list.prepend(li);
+  if(list.children.length>8) list.removeChild(list.lastChild);
+  requestAnimationFrame(()=>li.classList.add('in'));
+  hist.push({expr,res});
+}
+
+// ── DISPLAY ──
+function setDisplay(v){
+  const el=document.getElementById('dNum');
+  el.textContent=v;
+  document.getElementById('dExpr').textContent=expr;
+  gsap.fromTo(el,{opacity:.5,y:-4},{opacity:1,y:0,duration:.25,ease:'power2.out'});
+}
+
+// ── CALCULATOR LOGIC ──
+let justCalc=false;
+
+function setMode(m){
+  mode=m; isDeg=(m==='deg');
+  ['mDeg','mRad','mHex'].forEach(id=>document.getElementById(id).classList.remove('active'));
+  document.getElementById(m==='deg'?'mDeg':m==='rad'?'mRad':'mHex').classList.add('active');
+  document.getElementById('dMode').textContent=m.toUpperCase();
+}
+
+function num(n){ if(justCalc){expr='';justCalc=false;} if(expr==='0'&&n!=='.')expr=''; expr+=n; setDisplay(expr); }
+function op(o){ justCalc=false; const m={'÷':'/','×':'*','−':'-','+':'+','%':'%'}; expr+=m[o]||o; setDisplay(expr); }
+function fn(f){ justCalc=false; if(f==='π')expr+=Math.PI; else if(f==='e')expr+=Math.E; else expr+=f; setDisplay(expr); }
+function bksp(){ expr=expr.slice(0,-1)||'0'; setDisplay(expr||'0'); }
+function clearAll(){
+  expr=''; justCalc=false;
+  document.getElementById('tape').textContent='';
+  gsap.fromTo('#dNum',{scale:1.1,color:'#ff2d7a'},{scale:1,color:'#e8f4f8',duration:.4});
+  setDisplay('0');
+}
+function toggleSign(){ if(!expr)return; expr=expr.startsWith('-')?expr.slice(1):'-'+expr; setDisplay(expr); }
+
+function calc(){
+  try{
+    let e=expr
+      .replace(/sin\(/g,'__sin(').replace(/cos\(/g,'__cos(').replace(/tan\(/g,'__tan(')
+      .replace(/log\(/g,'Math.log10(').replace(/ln\(/g,'Math.log(').replace(/√\(/g,'Math.sqrt(').replace(/\^/g,'**');
+    if(isDeg){
+      e=e.replace(/__sin\(/g,'Math.sin(Math.PI/180*').replace(/__cos\(/g,'Math.cos(Math.PI/180*').replace(/__tan\(/g,'Math.tan(Math.PI/180*');
+    } else {
+      e=e.replace(/__sin\(/g,'Math.sin(').replace(/__cos\(/g,'Math.cos(').replace(/__tan\(/g,'Math.tan(');
+    }
+    const result=Function('"use strict";return('+e+')')();
+    const rounded=parseFloat(result.toPrecision(12));
+    document.getElementById('tape').textContent=expr+' = '+rounded;
+    addHistory(expr,rounded);
+    updateChart(rounded);
+
+    gsap.fromTo('#dNum',
+      {textShadow:'0 0 30px rgba(0,245,255,1)',color:'#00f5ff'},
+      {textShadow:'0 0 0px rgba(0,245,255,0)',color:'#e8f4f8',duration:.8}
+    );
+    beep(1200,.1,.12);
+
+    expr=String(rounded); justCalc=true;
+    setDisplay(rounded);
+  } catch(err){
+    gsap.fromTo('#dNum',{color:'#ff2d7a'},{color:'#e8f4f8',duration:.5});
+    beep(200,.15,.1);
+    document.getElementById('dNum').textContent='خطأ';
+    setTimeout(()=>setDisplay(expr||'0'),1500);
+  }
+}
+
+// Memory
+function memStore(){ mem=parseFloat(document.getElementById('dNum').textContent)||0; document.getElementById('memVal').textContent=mem; }
+function memRecall(){ expr=String(mem); setDisplay(expr); }
+function memClear(){ mem=0; document.getElementById('memVal').textContent='—'; }
+function memAdd(){ mem+=parseFloat(document.getElementById('dNum').textContent)||0; document.getElementById('memVal').textContent=mem; }
+function memSub(){ mem-=parseFloat(document.getElementById('dNum').textContent)||0; document.getElementById('memVal').textContent=mem; }
+function history2Mem(){ if(hist.length){mem=hist[hist.length-1].res; document.getElementById('memVal').textContent=mem;} }
+
+// Keyboard
+document.addEventListener('keydown',e=>{
+  if('0123456789.'.includes(e.key)) num(e.key);
+  else if(e.key==='+') op('+');
+  else if(e.key==='-') op('−');
+  else if(e.key==='*') op('×');
+  else if(e.key==='/'){ e.preventDefault(); op('÷'); }
+  else if(e.key==='%') op('%');
+  else if(e.key==='Enter'||e.key==='=') calc();
+  else if(e.key==='Backspace') bksp();
+  else if(e.key==='Escape') clearAll();
+  else if(e.key==='(') fn('(');
+  else if(e.key===')') fn(')');
+});
+</script>
+</body>
+</html>
