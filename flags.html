@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>أعلام الدول — ثلاثية</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #030d07;
+    --panel: #071410;
+    --card-bg: #0b1f14;
+    --accent: #4ade80;
+    --accent2: #22c55e;
+    --text: #f0f0f8;
+    --muted: #4a7a5a;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    font-family: 'Tajawal', sans-serif;
+    color: var(--text);
+    min-height: 100vh;
+    padding: 1.5rem 1rem 4rem;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse 60% 40% at 50% 0%, rgba(74,222,128,0.08) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  nav {
+    position: fixed;
+    top: 1.5rem;
+    right: 1.5rem;
+    z-index: 10;
+  }
+  nav a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.85rem;
+    padding: 0.5rem 1rem;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 50px;
+    background: rgba(255,255,255,0.03);
+    transition: color 0.2s, border-color 0.2s;
+  }
+  nav a:hover { color: var(--accent); border-color: rgba(74,222,128,0.3); }
+
+  .page-header {
+    text-align: center;
+    padding: 1rem 0 2rem;
+    position: relative;
+    z-index: 1;
+    animation: fadeDown 0.6s ease both;
+  }
+  .page-header h1 { font-size: 2rem; font-weight: 900; color: var(--accent); }
+  .page-header p { font-size: 0.9rem; color: var(--muted); margin-top: 0.25rem; }
+
+  .search-bar {
+    position: relative;
+    z-index: 1;
+    max-width: 500px;
+    margin: 0 auto 2rem;
+    animation: fadeDown 0.6s ease 0.1s both;
+  }
+  .search-bar input {
+    width: 100%;
+    background: var(--card-bg);
+    border: 1px solid rgba(74,222,128,0.2);
+    border-radius: 12px;
+    padding: 0.9rem 1.25rem;
+    color: var(--text);
+    font-family: 'Tajawal', sans-serif;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.2s;
+    text-align: right;
+  }
+  .search-bar input:focus { border-color: rgba(74,222,128,0.5); }
+  .search-bar input::placeholder { color: var(--muted); }
+
+  .region-tabs {
+    display: flex;
+    gap: 0.5rem;
+    max-width: 900px;
+    margin: 0 auto 2rem;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+    position: relative;
+    z-index: 1;
+    justify-content: center;
+    flex-wrap: wrap;
+    animation: fadeDown 0.6s ease 0.15s both;
+  }
+  .tab {
+    padding: 0.5rem 1.1rem;
+    border-radius: 50px;
+    border: 1px solid rgba(74,222,128,0.15);
+    background: transparent;
+    color: var(--muted);
+    font-family: 'Tajawal', sans-serif;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .tab:hover { color: var(--accent); border-color: rgba(74,222,128,0.3); }
+  .tab.active { background: rgba(74,222,128,0.15); color: var(--accent); border-color: rgba(74,222,128,0.4); }
+
+  .count-bar {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.85rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+    z-index: 1;
+  }
+  .count-bar span { color: var(--accent); font-weight: 700; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1rem;
+    max-width: 1100px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  .flag-card {
+    background: var(--card-bg);
+    border: 1px solid rgba(74,222,128,0.1);
+    border-radius: 16px;
+    padding: 1.25rem 1rem;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.25s cubic-bezier(0.23, 1, 0.32, 1), border-color 0.2s, box-shadow 0.2s;
+    animation: fadeUp 0.5s ease both;
+  }
+  .flag-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(74,222,128,0.35);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4), 0 0 20px rgba(74,222,128,0.08);
+  }
+
+  .flag-emoji { font-size: 3rem; line-height: 1; margin-bottom: 0.75rem; }
+  .flag-name { font-size: 0.9rem; font-weight: 700; margin-bottom: 0.25rem; }
+  .flag-capital { font-size: 0.75rem; color: var(--muted); }
+
+  /* Modal */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(3,13,7,0.85);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    backdrop-filter: blur(8px);
+  }
+  .modal-overlay.show { display: flex; animation: fadeIn 0.25s ease; }
+  .modal {
+    background: #0d2018;
+    border: 1px solid rgba(74,222,128,0.25);
+    border-radius: 24px;
+    padding: 2rem;
+    max-width: 380px;
+    width: 100%;
+    text-align: center;
+    position: relative;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.6), 0 0 40px rgba(74,222,128,0.08);
+    animation: scaleIn 0.25s cubic-bezier(0.23,1,0.32,1);
+  }
+  .modal-close {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    background: rgba(255,255,255,0.05);
+    border: none;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background 0.2s;
+  }
+  .modal-close:hover { background: rgba(255,255,255,0.1); }
+  .modal-flag { font-size: 5rem; margin-bottom: 1rem; }
+  .modal-name { font-size: 1.8rem; font-weight: 900; margin-bottom: 0.25rem; }
+  .modal-name-en { font-size: 0.9rem; color: var(--muted); margin-bottom: 1.5rem; }
+  .modal-info { display: grid; gap: 0.75rem; text-align: right; }
+  .info-row { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; background: rgba(255,255,255,0.03); border-radius: 10px; border: 1px solid rgba(255,255,255,0.05); }
+  .info-key { color: var(--muted); font-size: 0.85rem; }
+  .info-val { font-size: 0.9rem; font-weight: 700; }
+
+  .no-results { text-align: center; color: var(--muted); padding: 4rem 0; font-size: 1.1rem; display: none; }
+
+  @keyframes fadeDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes scaleIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+</style>
+</head>
+<body>
+
+<nav><a href="index.html">← الرئيسية</a></nav>
+
+<div class="page-header">
+  <h1>🌍 أعلام الدول</h1>
+  <p>استكشف دول العالم وعواصمها</p>
+</div>
+
+<div class="search-bar">
+  <input type="text" id="search" placeholder="🔍 ابحث عن دولة..." oninput="filterCards()">
+</div>
+
+<div class="region-tabs" id="tabs"></div>
+<div class="count-bar">عرض <span id="count">0</span> دولة</div>
+<div class="grid" id="grid"></div>
+<div class="no-results" id="no-results">لا توجد نتائج 😕</div>
+
+<div class="modal-overlay" id="modal" onclick="closeModal(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="document.getElementById('modal').classList.remove('show')">✕</button>
+    <div class="modal-flag" id="m-flag"></div>
+    <div class="modal-name" id="m-name"></div>
+    <div class="modal-name-en" id="m-name-en"></div>
+    <div class="modal-info" id="m-info"></div>
+  </div>
+</div>
+
+<script>
+const countries = [
+  // العالم العربي
+  {flag:'🇸🇦',name:'المملكة العربية السعودية',nameEn:'Saudi Arabia',capital:'الرياض',lang:'العربية',pop:'35 مليون',region:'عربي',currency:'الريال'},
+  {flag:'🇪🇬',name:'مصر',nameEn:'Egypt',capital:'القاهرة',lang:'العربية',pop:'104 مليون',region:'عربي',currency:'الجنيه'},
+  {flag:'SY_NEW',name:'سوريا',nameEn:'Syria',capital:'دمشق',lang:'العربية',pop:'22 مليون',region:'عربي',currency:'الليرة'},
+  {flag:'🇦🇪',name:'الإمارات',nameEn:'UAE',capital:'أبوظبي',lang:'العربية',pop:'10 مليون',region:'عربي',currency:'الدرهم'},
+  {flag:'🇯🇴',name:'الأردن',nameEn:'Jordan',capital:'عمّان',lang:'العربية',pop:'10 مليون',region:'عربي',currency:'الدينار'},
+  {flag:'🇱🇧',name:'لبنان',nameEn:'Lebanon',capital:'بيروت',lang:'العربية',pop:'7 مليون',region:'عربي',currency:'الليرة'},
+  {flag:'🇮🇶',name:'العراق',nameEn:'Iraq',capital:'بغداد',lang:'العربية',pop:'41 مليون',region:'عربي',currency:'الدينار'},
+  {flag:'🇰🇼',name:'الكويت',nameEn:'Kuwait',capital:'مدينة الكويت',lang:'العربية',pop:'4.2 مليون',region:'عربي',currency:'الدينار'},
+  {flag:'🇶🇦',name:'قطر',nameEn:'Qatar',capital:'الدوحة',lang:'العربية',pop:'2.9 مليون',region:'عربي',currency:'الريال'},
+  {flag:'🇲🇦',name:'المغرب',nameEn:'Morocco',capital:'الرباط',lang:'العربية',pop:'37 مليون',region:'عربي',currency:'الدرهم'},
+  {flag:'🇩🇿',name:'الجزائر',nameEn:'Algeria',capital:'الجزائر',lang:'العربية',pop:'44 مليون',region:'عربي',currency:'الدينار'},
+  {flag:'🇹🇳',name:'تونس',nameEn:'Tunisia',capital:'تونس',lang:'العربية',pop:'12 مليون',region:'عربي',currency:'الدينار'},
+  {flag:'🇱🇾',name:'ليبيا',nameEn:'Libya',capital:'طرابلس',lang:'العربية',pop:'7 مليون',region:'عربي',currency:'الدينار'},
+  {flag:'🇸🇩',name:'السودان',nameEn:'Sudan',capital:'الخرطوم',lang:'العربية',pop:'46 مليون',region:'عربي',currency:'الجنيه'},
+  {flag:'🇾🇪',name:'اليمن',nameEn:'Yemen',capital:'صنعاء',lang:'العربية',pop:'33 مليون',region:'عربي',currency:'الريال'},
+  {flag:'🇴🇲',name:'عُمان',nameEn:'Oman',capital:'مسقط',lang:'العربية',pop:'4.5 مليون',region:'عربي',currency:'الريال'},
+  {flag:'🇧🇭',name:'البحرين',nameEn:'Bahrain',capital:'المنامة',lang:'العربية',pop:'1.7 مليون',region:'عربي',currency:'الدينار'},
+  {flag:'🇵🇸',name:'فلسطين',nameEn:'Palestine',capital:'القدس',lang:'العربية',pop:'5.5 مليون',region:'عربي',currency:'الشيكل'},
+  // أوروبا
+  {flag:'🇹🇷',name:'تركيا',nameEn:'Turkey',capital:'أنقرة',lang:'التركية',pop:'85 مليون',region:'أوروبا',currency:'الليرة'},
+  {flag:'🇩🇪',name:'ألمانيا',nameEn:'Germany',capital:'برلين',lang:'الألمانية',pop:'84 مليون',region:'أوروبا',currency:'اليورو'},
+  {flag:'🇫🇷',name:'فرنسا',nameEn:'France',capital:'باريس',lang:'الفرنسية',pop:'68 مليون',region:'أوروبا',currency:'اليورو'},
+  {flag:'🇬🇧',name:'المملكة المتحدة',nameEn:'UK',capital:'لندن',lang:'الإنجليزية',pop:'67 مليون',region:'أوروبا',currency:'الجنيه'},
+  {flag:'🇮🇹',name:'إيطاليا',nameEn:'Italy',capital:'روما',lang:'الإيطالية',pop:'60 مليون',region:'أوروبا',currency:'اليورو'},
+  {flag:'🇪🇸',name:'إسبانيا',nameEn:'Spain',capital:'مدريد',lang:'الإسبانية',pop:'47 مليون',region:'أوروبا',currency:'اليورو'},
+  {flag:'🇷🇺',name:'روسيا',nameEn:'Russia',capital:'موسكو',lang:'الروسية',pop:'144 مليون',region:'أوروبا',currency:'الروبل'},
+  {flag:'🇳🇱',name:'هولندا',nameEn:'Netherlands',capital:'أمستردام',lang:'الهولندية',pop:'17 مليون',region:'أوروبا',currency:'اليورو'},
+  {flag:'🇵🇱',name:'بولندا',nameEn:'Poland',capital:'وارسو',lang:'البولندية',pop:'38 مليون',region:'أوروبا',currency:'الزلوتي'},
+  {flag:'🇬🇷',name:'اليونان',nameEn:'Greece',capital:'أثينا',lang:'اليونانية',pop:'10 مليون',region:'أوروبا',currency:'اليورو'},
+  // آسيا
+  {flag:'🇨🇳',name:'الصين',nameEn:'China',capital:'بكين',lang:'الماندرين',pop:'1.4 مليار',region:'آسيا',currency:'اليوان'},
+  {flag:'🇯🇵',name:'اليابان',nameEn:'Japan',capital:'طوكيو',lang:'اليابانية',pop:'126 مليون',region:'آسيا',currency:'الين'},
+  {flag:'🇰🇷',name:'كوريا الجنوبية',nameEn:'South Korea',capital:'سيول',lang:'الكورية',pop:'52 مليون',region:'آسيا',currency:'الوون'},
+  {flag:'🇮🇳',name:'الهند',nameEn:'India',capital:'نيودلهي',lang:'الهندية',pop:'1.4 مليار',region:'آسيا',currency:'الروبية'},
+  {flag:'🇮🇩',name:'إندونيسيا',nameEn:'Indonesia',capital:'جاكرتا',lang:'الإندونيسية',pop:'273 مليون',region:'آسيا',currency:'الروبية'},
+  {flag:'🇮🇷',name:'إيران',nameEn:'Iran',capital:'طهران',lang:'الفارسية',pop:'85 مليون',region:'آسيا',currency:'الريال'},
+  {flag:'🇵🇰',name:'باكستان',nameEn:'Pakistan',capital:'إسلام آباد',lang:'الأردية',pop:'230 مليون',region:'آسيا',currency:'الروبية'},
+  {flag:'🇹🇭',name:'تايلاند',nameEn:'Thailand',capital:'بانكوك',lang:'التايلاندية',pop:'70 مليون',region:'آسيا',currency:'البات'},
+  {flag:'🇲🇾',name:'ماليزيا',nameEn:'Malaysia',capital:'كوالالمبور',lang:'الملايو',pop:'33 مليون',region:'آسيا',currency:'الرينغيت'},
+  // أفريقيا
+  {flag:'🇳🇬',name:'نيجيريا',nameEn:'Nigeria',capital:'أبوجا',lang:'الإنجليزية',pop:'216 مليون',region:'أفريقيا',currency:'النايرا'},
+  {flag:'🇿🇦',name:'جنوب أفريقيا',nameEn:'South Africa',capital:'بريتوريا',lang:'متعددة',pop:'60 مليون',region:'أفريقيا',currency:'الراند'},
+  {flag:'🇪🇹',name:'إثيوبيا',nameEn:'Ethiopia',capital:'أديس أبابا',lang:'الأمهرية',pop:'120 مليون',region:'أفريقيا',currency:'البير'},
+  {flag:'🇰🇪',name:'كينيا',nameEn:'Kenya',capital:'نيروبي',lang:'السواحلية',pop:'54 مليون',region:'أفريقيا',currency:'الشلن'},
+  {flag:'🇬🇭',name:'غانا',nameEn:'Ghana',capital:'أكرا',lang:'الإنجليزية',pop:'32 مليون',region:'أفريقيا',currency:'السيدي'},
+  {flag:'🇸🇳',name:'السنغال',nameEn:'Senegal',capital:'داكار',lang:'الفرنسية',pop:'17 مليون',region:'أفريقيا',currency:'الفرنك'},
+  // الأمريكتان
+  {flag:'🇺🇸',name:'الولايات المتحدة',nameEn:'USA',capital:'واشنطن',lang:'الإنجليزية',pop:'331 مليون',region:'أمريكا',currency:'الدولار'},
+  {flag:'🇧🇷',name:'البرازيل',nameEn:'Brazil',capital:'برازيليا',lang:'البرتغالية',pop:'215 مليون',region:'أمريكا',currency:'الريال'},
+  {flag:'🇲🇽',name:'المكسيك',nameEn:'Mexico',capital:'مكسيكو سيتي',lang:'الإسبانية',pop:'130 مليون',region:'أمريكا',currency:'البيزو'},
+  {flag:'🇨🇦',name:'كندا',nameEn:'Canada',capital:'أوتاوا',lang:'الإنجليزية',pop:'38 مليون',region:'أمريكا',currency:'الدولار'},
+  {flag:'🇦🇷',name:'الأرجنتين',nameEn:'Argentina',capital:'بيونس آيرس',lang:'الإسبانية',pop:'45 مليون',region:'أمريكا',currency:'البيزو'},
+  {flag:'🇨🇱',name:'تشيلي',nameEn:'Chile',capital:'سانتياغو',lang:'الإسبانية',pop:'19 مليون',region:'أمريكا',currency:'البيزو'},
+  // أوقيانوسيا
+  {flag:'🇦🇺',name:'أستراليا',nameEn:'Australia',capital:'كانبرا',lang:'الإنجليزية',pop:'26 مليون',region:'أوقيانوسيا',currency:'الدولار'},
+  {flag:'🇳🇿',name:'نيوزيلندا',nameEn:'New Zealand',capital:'ويلينغتون',lang:'الإنجليزية',pop:'5 مليون',region:'أوقيانوسيا',currency:'الدولار'},
+];
+
+// SVG للأعلام التي لا تملك إيموجي رسمي
+const SVG_FLAGS = {
+  SY_NEW: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600" width="54" height="36" style="border-radius:5px;display:block;margin:0 auto 0.75rem;box-shadow:0 2px 8px rgba(0,0,0,0.4)">
+    <rect width="900" height="200" y="0" fill="#007a3d"/>
+    <rect width="900" height="200" y="200" fill="#ffffff"/>
+    <rect width="900" height="200" y="400" fill="#000000"/>
+    <g fill="#007a3d" transform="translate(450,300)">
+      <polygon points="0,-30 6.9,-21.2 18,-21.2 9.6,-12.8 12.7,-1.5 0,-8.5 -12.7,-1.5 -9.6,-12.8 -18,-21.2 -6.9,-21.2" transform="translate(-130,0)"/>
+      <polygon points="0,-30 6.9,-21.2 18,-21.2 9.6,-12.8 12.7,-1.5 0,-8.5 -12.7,-1.5 -9.6,-12.8 -18,-21.2 -6.9,-21.2"/>
+      <polygon points="0,-30 6.9,-21.2 18,-21.2 9.6,-12.8 12.7,-1.5 0,-8.5 -12.7,-1.5 -9.6,-12.8 -18,-21.2 -6.9,-21.2" transform="translate(130,0)"/>
+    </g>
+  </svg>`,
+};
+
+const SVG_FLAGS_LARGE = {
+  SY_NEW: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600" width="130" height="87" style="border-radius:8px;display:block;margin:0 auto 1rem;box-shadow:0 4px 20px rgba(0,0,0,0.5)">
+    <rect width="900" height="200" y="0" fill="#007a3d"/>
+    <rect width="900" height="200" y="200" fill="#ffffff"/>
+    <rect width="900" height="200" y="400" fill="#000000"/>
+    <g fill="#007a3d" transform="translate(450,300)">
+      <polygon points="0,-40 9.2,-28.4 24,-28.4 12.8,-17.2 17,-2 0,-11.4 -17,-2 -12.8,-17.2 -24,-28.4 -9.2,-28.4" transform="translate(-170,0)"/>
+      <polygon points="0,-40 9.2,-28.4 24,-28.4 12.8,-17.2 17,-2 0,-11.4 -17,-2 -12.8,-17.2 -24,-28.4 -9.2,-28.4"/>
+      <polygon points="0,-40 9.2,-28.4 24,-28.4 12.8,-17.2 17,-2 0,-11.4 -17,-2 -12.8,-17.2 -24,-28.4 -9.2,-28.4" transform="translate(170,0)"/>
+    </g>
+  </svg>`,
+};
+
+function getFlagSmall(flag) {
+  if (SVG_FLAGS[flag]) return SVG_FLAGS[flag];
+  return `<div class="flag-emoji">${flag}</div>`;
+}
+
+function getFlagLarge(flag) {
+  if (SVG_FLAGS_LARGE[flag]) return SVG_FLAGS_LARGE[flag];
+  return `<span style="font-size:5rem;line-height:1;display:block;margin-bottom:1rem">${flag}</span>`;
+}
+
+const regions = ['الكل', ...new Set(countries.map(c => c.region))];
+let activeRegion = 'الكل';
+
+function buildTabs() {
+  const tabs = document.getElementById('tabs');
+  regions.forEach(r => {
+    const btn = document.createElement('button');
+    btn.className = 'tab' + (r === 'الكل' ? ' active' : '');
+    btn.textContent = r;
+    btn.onclick = () => {
+      activeRegion = r;
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      filterCards();
+    };
+    tabs.appendChild(btn);
+  });
+}
+
+function filterCards() {
+  const q = document.getElementById('search').value.trim().toLowerCase();
+  const filtered = countries.filter(c => {
+    const matchRegion = activeRegion === 'الكل' || c.region === activeRegion;
+    const matchSearch = !q || c.name.includes(q) || c.capital.includes(q) || c.nameEn.toLowerCase().includes(q);
+    return matchRegion && matchSearch;
+  });
+  renderCards(filtered);
+}
+
+function renderCards(list) {
+  const grid = document.getElementById('grid');
+  const noRes = document.getElementById('no-results');
+  document.getElementById('count').textContent = list.length;
+  grid.innerHTML = '';
+  if (!list.length) { noRes.style.display = 'block'; return; }
+  noRes.style.display = 'none';
+  list.forEach((c, i) => {
+    const card = document.createElement('div');
+    card.className = 'flag-card';
+    card.style.animationDelay = `${Math.min(i * 0.03, 0.5)}s`;
+    card.innerHTML = `${getFlagSmall(c.flag)}<div class="flag-name">${c.name}</div><div class="flag-capital">🏛 ${c.capital}</div>`;
+    card.onclick = () => showModal(c);
+    grid.appendChild(card);
+  });
+}
+
+function showModal(c) {
+  document.getElementById('m-flag').innerHTML = getFlagLarge(c.flag);
+  document.getElementById('m-name').textContent = c.name;
+  document.getElementById('m-name-en').textContent = c.nameEn;
+  document.getElementById('m-info').innerHTML = `
+    <div class="info-row"><span class="info-key">🏛 العاصمة</span><span class="info-val">${c.capital}</span></div>
+    <div class="info-row"><span class="info-key">🗣 اللغة</span><span class="info-val">${c.lang}</span></div>
+    <div class="info-row"><span class="info-key">👥 السكان</span><span class="info-val">${c.pop}</span></div>
+    <div class="info-row"><span class="info-key">💰 العملة</span><span class="info-val">${c.currency}</span></div>
+    <div class="info-row"><span class="info-key">🌍 المنطقة</span><span class="info-val">${c.region}</span></div>
+  `;
+  document.getElementById('modal').classList.add('show');
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('modal')) document.getElementById('modal').classList.remove('show');
+}
+
+buildTabs();
+filterCards();
+</script>
+</body>
+</html>
